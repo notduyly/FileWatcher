@@ -1,9 +1,9 @@
 from database import init_db, insert_event, get_connection, fetch_all_events, delete_event, reset_db
 
 if __name__ == "__main__":
-    init_db()
+    # init_db()
     
-    insert_event("test.txt", "testing creating a new event")
+    insert_event("test.txt", "adding event", 1234)
     
     # reset_db()
     

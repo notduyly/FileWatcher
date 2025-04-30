@@ -40,11 +40,14 @@ def init_db():
         )
     ''')
     
-    # Create events table
+    # Create events table with updated structure
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS events (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             filename TEXT NOT NULL,
+            file_extension TEXT NOT NULL,
+            event_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+            file_size INTEGER NOT NULL,
             event TEXT NOT NULL
         )
     ''')
@@ -64,16 +67,23 @@ def fetch_all_events():
     
     return events
 
-def insert_event(theFilename, theEvent):
+def insert_event(filename, event, file_size):
+    """
+    Insert a file event with additional metadata
+    """
     conn = get_connection()
     if conn is None:
         return
-    cursor = conn.cursor()
     
+    # Split filename to get extension
+    file_extension = filename.split('.')[-1] if '.' in filename else ''
+    
+    cursor = conn.cursor()
     cursor.execute('''
-        INSERT INTO events (filename, event)
-        VALUES (?, ?)
-    ''', (theFilename, theEvent))
+        INSERT INTO events (filename, file_extension, file_size, event)
+        VALUES (?, ?, ?, ?)
+    ''', (filename, file_extension, file_size, event))
+    
     conn.commit()
     conn.close()
     
