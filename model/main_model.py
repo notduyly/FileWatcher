@@ -1,7 +1,9 @@
 from database import init_db, insert_event, get_connection, fetch_all_events, delete_event, reset_db
 
-if __name__ == "__main__" and get_connection() is None:
+if __name__ == "__main__":
     init_db()
+    
+    insert_event("test.txt", "testing creating a new event")
     # reset_db()
     
     events = fetch_all_events()
