@@ -4,7 +4,10 @@ if __name__ == "__main__":
     init_db()
     
     insert_event("test.txt", "testing creating a new event")
+    
     # reset_db()
+    
+    # delete_event(1)
     
     events = fetch_all_events()
 
