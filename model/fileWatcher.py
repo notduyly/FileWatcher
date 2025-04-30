@@ -1,12 +1,11 @@
 import time
 from watchdog.observers import Observer
 from watchdog.events import LoggingEventHandler
-from eventHandler import MyEventHandler
 
 class FileWatcher:
     def __init__(self, path, event_handler=LoggingEventHandler, recursive=True):
         self.path = path
-        self.event_handler = event_handler or MyEventHandler()
+        self.event_handler = event_handler
         self.recursive = recursive
         self.observer = None
     
