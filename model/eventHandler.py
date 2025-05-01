@@ -17,10 +17,3 @@ class MyEventHandler(FileSystemEventHandler):
     def on_deleted(self, event):
         logging.info(f'Deleted file at {event.src_path}')
         return super().on_deleted(event)
-    
-    if __name__ == "__main__":
-        print("Testing MyEventHandler...")
-        handler = MyEventHandler()
-        print("MyEventHandler initialized successfully!")
-        print("This module doesn't do anything when run directly.")
-        print("It needs to be used with the FileWatcher class.")
