@@ -10,7 +10,7 @@ from model.eventHandler import MyEventHandler
 class WatcherController:
     def __init__(self):
         self.watcher = None
-        self.watch_directory = "/Users/austinnguyen/Code/FileWatcher"
+        self.watch_directory = "'/Users/sungmin/Desktop/University/Spring 2025/TCSS 360/Assignment 1'"
 
     def start_watching(self):
         handler = MyEventHandler()
