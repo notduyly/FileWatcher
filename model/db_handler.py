@@ -1,5 +1,8 @@
-import _sqlite3
+import sqlite3
 import csv
+import os
+from datetime import datetime
+import getpass
 from database import get_connection
 
 def init_event_table():
@@ -20,22 +23,46 @@ def init_event_table():
     conn.commit()
     conn.close()
     
-def insert_event(theFilename: str, theEvent: str, theFileSize: int):
-    """
-    Insert a file event with additional metadata
-    """
-    conn = get_connection()
-    if conn is None:
-        return
+# def insert_event(theEventType: str, theFilePath: str, theFileSize: int):
+#     """
+#     Insert a file event with additional metadata
+#     """
+#     conn = get_connection()
+#     if conn is None:
+#         return
     
-    file_extension = theFilename.split('.')[-1] if '.' in theFilename else ''
+#     file_extension = theFilename.split('.')[-1] if '.' in theFilename else ''
     
+#     cursor = conn.cursor()
+#     cursor.execute('''
+#         INSERT INTO events (filename, file_extension, file_size, event)
+#         VALUES (?, ?, ?, ?)
+#     ''', (theFilename, file_extension, theFileSize, theEvent))
+    
+#     conn.commit()
+#     conn.close()
+    
+def insert_event(event_type, file_path, is_directory=False):
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    file_name = os.path.basename(file_path)
+    file_extension = os.path.splitext(file_name)[1]
+    
+    file_size = os.path.getsize(file_path) if not is_directory and os.path.isfile(file_path) else None
+    
+    user = getpass.getuser()
+
+    conn = sqlite3.connect("file_events.db")
     cursor = conn.cursor()
-    cursor.execute('''
-        INSERT INTO events (filename, file_extension, file_size, event)
-        VALUES (?, ?, ?, ?)
-    ''', (theFilename, file_extension, theFileSize, theEvent))
-    
+    cursor.execute("""
+        INSERT INTO events (
+            timestamp, event_type, file_path, file_name,
+            file_extension, file_size, is_directory, user
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        timestamp, event_type, file_path, file_name,
+        file_extension, file_size, is_directory, user
+    ))
     conn.commit()
     conn.close()
     
