@@ -1,16 +1,13 @@
 import sys
 import os
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-
 from model.fileWatcher import FileWatcher
 from model.eventHandler import MyEventHandler
 
 class WatcherController:
     def __init__(self):
         self.watcher = None
-        self.watch_directory = "'/Users/sungmin/Desktop/University/Spring 2025/TCSS 360/Assignment 1'"
+        self.watch_directory = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "testFileToWatch")
 
     def start_watching(self):
         handler = MyEventHandler()

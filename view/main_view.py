@@ -2,8 +2,6 @@ import tkinter as tk
 import sys
 import os
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 class FileWatcherGUI:
     def __init__(self, root, controller):
         self.root = root

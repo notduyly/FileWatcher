@@ -2,7 +2,6 @@ import tkinter as tk
 import sys
 import os
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from controller.main_controller import WatcherController
 from view.main_view import FileWatcherGUI
