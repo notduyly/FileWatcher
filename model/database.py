@@ -67,7 +67,7 @@ def fetch_all_events():
     
     return events
 
-def insert_event(filename, event, file_size):
+def insert_event(theFilename, theEvent, theFile_size):
     """
     Insert a file event with additional metadata
     """
@@ -76,13 +76,13 @@ def insert_event(filename, event, file_size):
         return
     
     # Split filename to get extension
-    file_extension = filename.split('.')[-1] if '.' in filename else ''
+    file_extension = theFilename.split('.')[-1] if '.' in theFilename else ''
     
     cursor = conn.cursor()
     cursor.execute('''
         INSERT INTO events (filename, file_extension, file_size, event)
         VALUES (?, ?, ?, ?)
-    ''', (filename, file_extension, file_size, event))
+    ''', (theFilename, file_extension, theFile_size, theEvent))
     
     conn.commit()
     conn.close()
