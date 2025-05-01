@@ -20,55 +20,6 @@ def init_event_table():
     conn.commit()
     conn.close()
     
-def fetch_all_events():
-    """
-    Fetches all events from the database.
-    """
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM events')
-    events = cursor.fetchall()
-    conn.close()
-    
-    return events
-
-def fetch_event_by_type():
-    """
-    Fetches events from the database grouped by event type.
-    """
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute('SELECT event, COUNT(*) FROM events GROUP BY event')
-    events = cursor.fetchall()
-    conn.close()
-    
-    return events
-
-def fetch_event_by_extension():
-    """
-    Fetches events from the database grouped by file extension.
-    """
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute('SELECT file_extension, COUNT(*) FROM events GROUP BY file_extension')
-    events = cursor.fetchall()
-    conn.close()
-    
-    return events
-
-def fetch_event_by_after_date(date: str):
-    """
-    Fetches events from the database that occurred after a specified date.
-    :param date: The date in 'YYYY-MM-DD' format.
-    """
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM events WHERE event_timestamp > ?', (date,))
-    events = cursor.fetchall()
-    conn.close()
-    
-    return events
-
 def insert_event(theFilename: str, theEvent: str, theFileSize: int):
     """
     Insert a file event with additional metadata
@@ -120,19 +71,68 @@ def reset_db():
     conn.commit()
     conn.close()
     
-def export_to_csv(filename: str):
+def fetch_all_events():
+    """
+    Fetches all events from the database.
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM events')
+    events = cursor.fetchall()
+    conn.close()
+    
+    return events
+
+def fetch_event_by_type():
+    """
+    Fetches events from the database grouped by event type.
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT event, COUNT(*) FROM events GROUP BY event')
+    events = cursor.fetchall()
+    conn.close()
+    
+    return events
+
+def fetch_event_by_extension():
+    """
+    Fetches events from the database grouped by file extension.
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT file_extension, COUNT(*) FROM events GROUP BY file_extension')
+    events = cursor.fetchall()
+    conn.close()
+    
+    return events
+
+def fetch_event_by_after_date(theDate: str):
+    """
+    Fetches events from the database that occurred after a specified date.
+    :param date: The date in 'YYYY-MM-DD' format.
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM events WHERE event_timestamp > ?', (theDate,))
+    events = cursor.fetchall()
+    conn.close()
+    
+    return events
+    
+def export_to_csv(theFilename: str):
     """
     Exports all events from the database to a CSV file.
     :param filename: The name of the CSV file to export to.
     """
     events = fetch_all_events()
     
-    with open(filename, mode='w', newline='') as file:
+    with open(theFilename, mode='w', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(['ID', 'Filename', 'File Extension', 'Event Timestamp', 'File Size', 'Event'])
         writer.writerows(events)
     
-    print(f"Data exported to {filename} successfully.")
+    print(f"Data exported to {theFilename} successfully.")
     
 def get_event_count():
     """
@@ -146,14 +146,14 @@ def get_event_count():
     
     return count
 
-def get_event_by_id(event_id: int):
+def get_event_by_id(theEventId: int):
     """
     Fetches a specific event by its ID.
     :param event_id: The ID of the event to fetch.
     """
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute('SELECT * FROM events WHERE id = ?', (event_id,))
+    cursor.execute('SELECT * FROM events WHERE id = ?', (theEventId,))
     event = cursor.fetchone()
     conn.close()
     
