@@ -28,7 +28,6 @@ def insert_event(theFilename: str, theEvent: str, theFileSize: int):
     if conn is None:
         return
     
-    # Split filename to get extension
     file_extension = theFilename.split('.')[-1] if '.' in theFilename else ''
     
     cursor = conn.cursor()
