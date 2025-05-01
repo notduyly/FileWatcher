@@ -3,7 +3,7 @@ import csv
 import os
 from datetime import datetime
 import getpass
-from database import get_connection
+from .database import get_connection
 
 def init_event_table():
     conn = get_connection()

@@ -1,6 +1,6 @@
 import logging
 from watchdog.events import FileSystemEventHandler
-from db_handler import insert_event
+from .db_handler import insert_event
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(message)s',
