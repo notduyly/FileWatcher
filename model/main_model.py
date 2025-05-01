@@ -1,4 +1,3 @@
-# import the modules
 from fileWatcher import FileWatcher
 from eventHandler import MyEventHandler
 
