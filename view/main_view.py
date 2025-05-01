@@ -1,33 +1,39 @@
 import tkinter as tk
-from FileWatcher.model.fileWatcher import FileWatcher
-from FileWatcher.model.eventHandler import MyEventHandler
+import sys
+import os
 
-root = tk.Tk()
-root.title("File System Watcher")
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-root.geometry("500x500")
+class FileWatcherGUI:
+    def __init__(self, root, controller):
+        self.root = root
+        self.controller = controller
+        self.setup_window()
 
-file_watcher = None
+    def setup_window(self):
+        self.root.title("File System Watcher")
+        self.root.geometry("500x500")
 
-def start_watching():
-    global file_watcher
-    # Create a handler instance
-    handler = MyEventHandler()
-    # Create and start the file watcher
-    file_watcher = FileWatcher('/Users/austinnguyen/Code/FileWatcher', handler)
-    file_watcher.start()
+        self.start_button = tk.Button(
+            self.root,
+            text="Start",
+            font=('Arial', 20),
+            command=self.start_watching
+        )
+        self.start_button.pack(padx=10, pady=10)
 
-def stop_watching():
-    global file_watcher
-    if file_watcher:
-        file_watcher.stop()
+        self.stop_button = tk.Button(
+            self.root,
+            text="Stop",
+            font=('Arial', 20),
+            command=self.stop_watching
+        )
+        self.stop_button.pack(padx=10, pady=20)
 
-# Create buttons with commands
-start_button = tk.Button(root, text="Start", font=('Arial', 20), command=start_watching)
-start_button.pack(padx=10, pady=10)
+    def start_watching(self):
+        self.controller.start_watching() 
 
-stop_button = tk.Button(root, text="Stop", font=('Arial', 20), command=stop_watching)
-stop_button.pack(padx=10, pady=10)
+    def stop_watching(self):
+        self.controller.stop_watching()
 
-root.mainloop()
 

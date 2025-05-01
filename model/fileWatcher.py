@@ -3,9 +3,9 @@ from watchdog.observers import Observer
 from watchdog.events import LoggingEventHandler
 
 class FileWatcher:
-    def __init__(self, path, event_handler=LoggingEventHandler, recursive=True):
+    def __init__(self, path, event_handler=None, recursive=True):
         self.path = path
-        self.event_handler = event_handler
+        self.event_handler = event_handler if event_handler else LoggingEventHandler()
         self.recursive = recursive
         self.observer = None
     
