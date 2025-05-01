@@ -40,17 +40,5 @@ def init_db():
         )
     ''')
     
-    # Create events table with updated structure
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS events (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            filename TEXT NOT NULL,
-            file_extension TEXT NOT NULL,
-            event_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-            file_size INTEGER NOT NULL,
-            event TEXT NOT NULL
-        )
-    ''')
-    
     conn.commit()
     conn.close()
