@@ -16,7 +16,7 @@ class FileWatcherGUI:
             self.root,
             text="Start",
             font=('Arial', 20),
-            command=self.start_watching
+            command=self.controller.start_watching
         )
         self.start_button.pack(padx=10, pady=10)
 
@@ -24,14 +24,9 @@ class FileWatcherGUI:
             self.root,
             text="Stop",
             font=('Arial', 20),
-            command=self.stop_watching
+            command=self.controller.stop_watching
         )
         self.stop_button.pack(padx=10, pady=20)
 
-    def start_watching(self):
-        self.controller.start_watching() 
-
-    def stop_watching(self):
-        self.controller.stop_watching()
 
 
