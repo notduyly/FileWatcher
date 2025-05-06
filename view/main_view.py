@@ -6,6 +6,7 @@ class FileWatcherGUI:
     def __init__(self, root, controller):
         self.root = root
         self.controller = controller
+        self.controller.set_view(self)
         self.setup_window()
 
     def setup_window(self):
@@ -16,7 +17,7 @@ class FileWatcherGUI:
             self.root,
             text="Start",
             font=('Arial', 20),
-            command=self.start_watching
+            command=self.controller.start_watching
         )
         self.start_button.pack(padx=10, pady=10)
 
@@ -24,14 +25,17 @@ class FileWatcherGUI:
             self.root,
             text="Stop",
             font=('Arial', 20),
-            command=self.stop_watching
+            command=self.controller.stop_watching
         )
         self.stop_button.pack(padx=10, pady=20)
 
-    def start_watching(self):
-        self.controller.start_watching() 
+        self.log_text = tk.Text(self.root, state='disabled', wrap='word')
+        self.log_text.pack(fill='both', expand=True, padx=10, pady=10)
 
-    def stop_watching(self):
-        self.controller.stop_watching()
+    def add_log(self, message: str):
+        self.log_text.config(state='normal')
+        self.log_text.insert('end', message + '\n')
+        self.log_text.see('end')
+        self.log_text.config(state='disabled')
 
 
