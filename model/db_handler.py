@@ -51,7 +51,7 @@ def insert_event(event_type, file_path, is_directory=False):
     
     user = getpass.getuser()
 
-    conn = sqlite3.connect("file_events.db")
+    conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("""
         INSERT INTO events (
