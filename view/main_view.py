@@ -1,6 +1,4 @@
 import tkinter as tk
-import sys
-import os
 
 class FileWatcherGUI:
     def __init__(self, root, controller):

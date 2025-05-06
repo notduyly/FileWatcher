@@ -1,7 +1,4 @@
 import tkinter as tk
-import sys
-import os
-
 
 from controller.main_controller import WatcherController
 from view.main_view import FileWatcherGUI
