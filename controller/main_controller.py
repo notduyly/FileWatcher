@@ -7,10 +7,14 @@ from model.eventHandler import MyEventHandler
 class WatcherController:
     def __init__(self):
         self.watcher = None
+        self.view = None
         self.watch_directory = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "testFileToWatch")
 
+    def set_view(self, view):
+        self.view = view
+
     def start_watching(self):
-        handler = MyEventHandler()
+        handler = MyEventHandler(logToTextbox=self.view.add_log)
         self.watcher = FileWatcher(self.watch_directory, handler)
         self.watcher.start()
         print(f"Started watching directory: {self.watch_directory}")
