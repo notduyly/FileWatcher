@@ -1,9 +1,12 @@
 import tkinter as tk
+from view.menubar import MenuBar
 
 class FileWatcherGUI:
     def __init__(self, root, controller):
         self.root = root
         self.controller = controller
+        self.menubar = MenuBar(self.root)
+        # self.root.config(menu=self.menubar.get_menubar())
         self.setup_window()
 
     def setup_window(self):
