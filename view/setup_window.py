@@ -26,11 +26,13 @@ class setupWindow:
         stop_button.pack(padx=10, pady=20)
 
         # Dropwdown menu to choose which file extension
-        self.fileExtensionSelection = tk.StringVar(value='')
-        fileExtensionOptions = ['', '.txt']
-        fileExtensionDropdown = tk.OptionMenu(root, self.fileExtensionSelection, *fileExtensionOptions)
-        fileExtensionDropdown.pack(padx=10, pady=10)
-
+        self.fileExtensionSelection = tk.StringVar(value='None')
+        self.fileExtensionOptions = ['None', '.png', '.txt']
+        self.fileExtensionDropdown = tk.OptionMenu(root, 
+                                            self.fileExtensionSelection, 
+                                            *[opt for opt in self.fileExtensionOptions if opt != self.fileExtensionSelection.get()])
+        
+        self.fileExtensionDropdown.pack(padx=10, pady=10)
         self.fileExtensionSelection.trace_add('write', self.on_extension_change)
 
         # Log to TextBox
@@ -44,5 +46,18 @@ class setupWindow:
         self.log_text.config(state='disabled')
     
     def on_extension_change(self, *args):
-        extension = self.fileExtensionSelection.get()
+        curr_selection = self.fileExtensionSelection.get()
+        print(curr_selection)
+
+        options = [opt for opt in self.fileExtensionOptions if opt != curr_selection]
+        # Recreate the menu with new options
+        menu = self.fileExtensionDropdown["menu"]
+        menu.delete(0, "end")
+        
+        # Add other options to the menu
+        for option in options:
+            menu.add_command(
+                label=option,
+                command=lambda value=option: self.fileExtensionSelection.set(value)
+            )
     
