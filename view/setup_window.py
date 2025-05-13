@@ -33,7 +33,7 @@ class setupWindow:
                                             *[opt for opt in self.fileExtensionOptions if opt != self.fileExtensionSelection.get()])
         
         self.fileExtensionDropdown.pack(padx=10, pady=10)
-        self.fileExtensionSelection.trace_add('write', self.on_extension_change)
+        self.fileExtensionSelection.trace_add('write', self.handle_fileExtension_change)
 
         # Log to TextBox
         self.log_text = tk.Text(self.root, state='disabled', wrap='word')
@@ -45,19 +45,18 @@ class setupWindow:
         self.log_text.see('end')
         self.log_text.config(state='disabled')
     
-    def on_extension_change(self, *args):
+    def handle_fileExtension_change(self, *args):
         curr_selection = self.fileExtensionSelection.get()
-        print(curr_selection)
 
+        # Recreate the menu with options that is not selected
         options = [opt for opt in self.fileExtensionOptions if opt != curr_selection]
-        # Recreate the menu with new options
-        menu = self.fileExtensionDropdown["menu"]
-        menu.delete(0, "end")
+        menu = self.fileExtensionDropdown['menu']
+        menu.delete(0, 'end')
         
-        # Add other options to the menu
         for option in options:
             menu.add_command(
                 label=option,
-                command=lambda value=option: self.fileExtensionSelection.set(value)
+                command=lambda 
+                value=option: self.fileExtensionSelection.set(value)
             )
     
