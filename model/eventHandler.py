@@ -5,15 +5,27 @@ logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S')
 
+# Inherits from FileSystemEventHandler. We override these
+# methods to handle how we react to file changes.
 class MyEventHandler(FileSystemEventHandler):
+    def __init__(self, logToTextbox=None):
+        super().__init__()
+        self.logToTextbox = logToTextbox
+    
     def on_modified(self, event):
-        logging.info(f'Modified file at: {event.src_path}')
+        msg = f'Modified {event.src_path}'
+        if self.logToTextbox:
+            self.logToTextbox(msg)
         return super().on_modified(event)
     
     def on_created(self, event):
-        logging.info(f'Created file at: {event.src_path}')
+        msg = f'Created {event.src_path}'
+        if self.logToTextbox:
+            self.logToTextbox(msg)
         return super().on_created(event)
     
     def on_deleted(self, event):
-        logging.info(f'Deleted file at {event.src_path}')
+        msg = f'Deleted {event.src_path}'
+        if self.logToTextbox:
+            self.logToTextbox(msg)
         return super().on_deleted(event)
