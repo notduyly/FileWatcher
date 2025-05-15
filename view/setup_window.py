@@ -103,4 +103,4 @@ class setupWindow:
 
     def open_query_window(self):
         """Open the database query window"""
-        QueryWindow(self.root)
+        QueryWindow(self.root, self.controller)
