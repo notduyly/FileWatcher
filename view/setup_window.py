@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import ttk
 import os
 import datetime
+from .query_window import QueryWindow
+
 class setupWindow:
     def __init__(self, root, controller):
         self.root = root
@@ -54,6 +56,15 @@ class setupWindow:
             self.tree.column(col, width=120, anchor=tk.W)
         self.tree.pack(fill=tk.BOTH, expand=True)
 
+        # Add Query Database button
+        query_button = tk.Button(
+            self.root,
+            text='Query Database',
+            font=('Arial', 20),
+            command=self.open_query_window
+        )
+        query_button.pack(padx=10, pady=20)
+
 
     def add_log(self, message: str):
         arr = message.split()
@@ -89,4 +100,7 @@ class setupWindow:
                 command=lambda 
                 value=option: self.fileExtensionSelection.set(value)
             )
-    
+
+    def open_query_window(self):
+        """Open the database query window"""
+        QueryWindow(self.root)

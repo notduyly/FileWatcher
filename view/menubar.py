@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import Menu
+from .query_window import QueryWindow
 
 class MenuBar:
     
@@ -25,8 +26,9 @@ class MenuBar:
         fsw_menu.add_command(label="Stop watching")
         self.menubar.add_cascade(label="File System Watcher", menu=fsw_menu)
 
-        # Database menu
+        # Database menu 수정
         db_menu = Menu(self.menubar, tearoff=0)
+        db_menu.add_command(label="Query Database", command=self.open_query_window)  # 추가
         db_menu.add_command(label="Save to database")
         self.menubar.add_cascade(label="Database", menu=db_menu)
 
@@ -43,4 +45,8 @@ class MenuBar:
     def exit_app(self):
         import sys
         sys.exit()
+
+    def open_query_window(self):
+        """Open the database query window"""
+        QueryWindow(self.root)
 
