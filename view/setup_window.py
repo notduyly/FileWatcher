@@ -9,9 +9,9 @@ class setupWindow:
 
         # Init Window
         root.title('File System Watcher')
-        root.geometry('500x500')
+        root.geometry('800x800')
 
-        # Start/Stop button
+        # Start/Stop and Directory buttons
         start_button = tk.Button(
             self.root,
             text='Start',
@@ -27,6 +27,15 @@ class setupWindow:
         )
         stop_button.pack(padx=10, pady=20)
 
+        open_directory_button = tk.Button(
+            self.root,
+            text='Open Directory',
+            font=('Arial', 20),
+            command=self.controller.open_directory
+        )
+        open_directory_button.pack(padx=10, pady=20)
+
+
         # Dropwdown menu to choose which file extension
         self.fileExtensionSelection = tk.StringVar(value='None')
         self.fileExtensionOptions = ['None', '.png', '.txt']
@@ -37,6 +46,7 @@ class setupWindow:
         self.fileExtensionDropdown.pack(padx=10, pady=10)
         self.fileExtensionSelection.trace_add('write', self.handle_fileExtension_change)
 
+        # TextBox to show changes
         cols = ("Filename","Extension","Path","Event","Timestamp")
         self.tree = ttk.Treeview(root, columns=cols, show='headings')
         for col in cols:
@@ -44,22 +54,14 @@ class setupWindow:
             self.tree.column(col, width=120, anchor=tk.W)
         self.tree.pack(fill=tk.BOTH, expand=True)
 
-        # Log to TextBox
-        self.log_text = tk.Text(self.root, state='disabled', wrap='word')
-        self.log_text.pack(fill='both', expand=True, padx=10, pady=10)
-
 
     def add_log(self, message: str):
-        # self.log_text.config(state='normal')
-        # self.log_text.insert('end', message + '\n')
-        # self.log_text.see('end')
-        # self.log_text.config(state='disabled')
-        print(message)
         arr = message.split()
         
         event_type = arr[0]
         file_path = arr[1]
         
+        print(file_path)
         filename, extension = os.path.splitext(os.path.basename(file_path))
         if not extension:
             extension = "(none)"

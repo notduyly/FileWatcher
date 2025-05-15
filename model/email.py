@@ -11,8 +11,7 @@ class EmailSender:
         self.smtp_server = "smtp.office365.com"
         self.smtp_port = 587
         
-    def send_email_with_attachment(self, recipient_email: str, subject: str, 
-                                 body: str, attachment_path: str) -> bool:
+    def send_email_with_attachment(self, recipient_email: str, subject: str, body: str, attachment_path: str) -> bool:
         """Send email with attachment using Office365 SMTP server.
         
         Args:
@@ -39,7 +38,7 @@ class EmailSender:
                 file_data = f.read()
                 file_name = os.path.basename(attachment_path)
             message.add_attachment(file_data, maintype="application", 
-                                 subtype="octet-stream", filename=file_name)
+                                    subtype="octet-stream", filename=file_name)
             
             context = ssl.create_default_context()
             with smtplib.SMTP(self.smtp_server, self.smtp_port) as server:

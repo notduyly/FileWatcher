@@ -3,6 +3,7 @@ import os
 
 from model.fileWatcher import FileWatcher
 from model.eventHandler import MyEventHandler
+from tkinter import filedialog
 
 class WatcherController:
     def __init__(self):
@@ -23,3 +24,8 @@ class WatcherController:
         if self.watcher:
             self.watcher.stop()
             print("Stopped watching")
+
+    def open_directory(self):
+        directory = filedialog.askdirectory()
+        if directory:
+            print(f"Selected directory: {directory}")
