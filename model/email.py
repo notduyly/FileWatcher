@@ -8,7 +8,7 @@ class EmailSender:
     def __init__(self, sender_email: str, password: str):
         self.sender_email = sender_email
         self.password = password
-        self.smtp_server = "FileWatcher.office365.com"
+        self.smtp_server = "smtp.office365.com"
         self.smtp_port = 587
         
     def send_email_with_attachment(self, recipient_email: str, subject: str, 
