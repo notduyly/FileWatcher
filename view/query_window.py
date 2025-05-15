@@ -1,14 +1,12 @@
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
-from email import EmailSender
-from model.db_handler import (fetch_all_events, fetch_event_by_type, 
-                            fetch_event_by_extension, fetch_event_by_after_date)
 import csv
 from datetime import datetime, timedelta
 
 class QueryWindow(tk.Toplevel):
-    def __init__(self, master):
+    def __init__(self, master, controller):
         super().__init__(master)
+        self.controller = controller
         self.title("Database Query")
         self.geometry("800x600")
         
@@ -82,39 +80,28 @@ class QueryWindow(tk.Toplevel):
         elif date_range == "Last 30 days":
             start_date = (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d")
         
-        # Fetch results based on filters
-        if start_date:
-            results = fetch_event_by_after_date(start_date)
-        else:
-            results = fetch_all_events()
-            
-        # Filter by extension if needed
-        if extension:
-            results = [r for r in results if r[2] == extension]  # Assuming extension is at index 2
-            
+        # Get results through controller
+        results = self.controller.query_events(extension, start_date)
+        
         # Display results
         for row in results:
             self.tree.insert("", "end", values=row)
         
-        self.db_results = results  # Store for export/email
-    
+        self.db_results = results
+
     def export_to_csv(self):
-        file_path = filedialog.asksaveasfilename(defaultextension=".csv",
-                                                 filetypes=[("CSV files", "*.csv")])
+        file_path = filedialog.asksaveasfilename(
+            defaultextension=".csv",
+            filetypes=[("CSV files", "*.csv")]
+        )
         if not file_path:
             return
 
-        try:
-            with open(file_path, mode="w", newline="", encoding="utf-8") as f:
-                writer = csv.writer(f)
-                writer.writerow(["ID", "Extension", "Filename", "PATH", "Event", "Date/Time"])
-                for row in self.db_results:
-                    writer.writerow(row)
+        if self.controller.export_to_csv(file_path, self.db_results):
             messagebox.showinfo("Success", f"CSV exported to {file_path}")
             self.last_exported_file = file_path
-
-        except Exception as e:
-            messagebox.showerror("Error", f"Failed to export CSV: {e}")
+        else:
+            messagebox.showerror("Error", "Failed to export CSV")
 
     def send_email(self):
         recipient = self.email_entry.get()
@@ -126,22 +113,7 @@ class QueryWindow(tk.Toplevel):
             messagebox.showwarning("Missing File", "Please export to CSV first.")
             return
         
-        try:
-            sender = EmailSender(sender_email="your@email.com", password="your_app_password")
-            subject = "File Watcher Query Result"
-            body = "Please find the attached CSV file of the query result."
-
-            success = sender.send_email_with_attachment(
-                recipient_email=recipient,
-                subject=subject,
-                body=body,
-                attachment_path=self.last_exported_file
-            )
-            
-            if success:
-                messagebox.showinfo("Success", "Email sent successfully.")
-            else:
-                messagebox.showerror("Failure", "Failed to send email.")
-                
-        except Exception as e:
-            messagebox.showerror("Error", f"Error sending email: {e}")
+        if self.controller.send_email_results(recipient, self.last_exported_file):
+            messagebox.showinfo("Success", "Email sent successfully.")
+        else:
+            messagebox.showerror("Error", "Failed to send email.")
