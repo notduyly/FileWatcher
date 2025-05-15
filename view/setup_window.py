@@ -60,6 +60,7 @@ class setupWindow:
         
         event_type = arr[0]
         file_path = arr[1]
+        
         print(file_path)
         filename, extension = os.path.splitext(os.path.basename(file_path))
         if not extension:
