@@ -1,60 +1,51 @@
-import smtplib
-import ssl
+import base64
+import os.path
 from email.message import EmailMessage
-import os
-from typing import Optional
+from google.auth.transport.requests import Request
+from google_auth_oauthlib.flow import InstalledAppFlow
+from google.oauth2.credentials import Credentials
+from googleapiclient.discovery import build
 
-class EmailSender:
-    def __init__(self, sender_email: str, password: str):
-        self.sender_email = sender_email
-        self.password = password
-        self.smtp_server = "smtp.office365.com"
-        self.smtp_port = 587
+SCOPES = ['https://www.googleapis.com/auth/gmail.send']
+
+def gmail_authenticate():
+    creds = None
+    
+    if os.path.exists('token.json'):
+        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
         
-    def send_email_with_attachment(self, recipient_email: str, subject: str, body: str, attachment_path: str) -> bool:
-        """Send email with attachment using Office365 SMTP server.
-        
-        Args:
-            recipient_email: Recipient's email address
-            subject: Email subject
-            body: Email body text
-            attachment_path: Path to attachment file
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file(
+                'credentials.json', SCOPES)
+            creds = flow.run_local_server(port=0)
             
-        Returns:
-            bool: True if email sent successfully, False otherwise
-        """
-        if not os.path.exists(attachment_path):
-            print(f"Error: Attachment file not found - {attachment_path}")
-            return False
-            
-        try:
-            message = EmailMessage()
-            message["From"] = self.sender_email
-            message["To"] = recipient_email
-            message["Subject"] = subject
-            message.set_content(body)
-            
-            with open(attachment_path, "rb") as f:
-                file_data = f.read()
-                file_name = os.path.basename(attachment_path)
-            message.add_attachment(file_data, maintype="application", 
-                                    subtype="octet-stream", filename=file_name)
-            
-            context = ssl.create_default_context()
-            with smtplib.SMTP(self.smtp_server, self.smtp_port) as server:
-                server.starttls(context=context)
-                server.login(self.sender_email, self.password)
-                server.send_message(message)
-                print("📨 Email sent successfully!")
-                return True
-                
-        except FileNotFoundError as e:
-            print(f"Error reading attachment: {e}")
-        except smtplib.SMTPAuthenticationError:
-            print("SMTP authentication failed. Check your email and password.")
-        except smtplib.SMTPException as e:
-            print(f"SMTP error occurred: {e}")
-        except Exception as e:
-            print(f"Unexpected error: {e}")
-        
-        return False
+        with open('token.json', 'w') as token:
+            token.write(creds.to_json())
+    return build('gmail', 'v1', credentials=creds)
+
+def send_email(service, to, subject, body_text, attachment_path=None):
+    message = EmailMessage()
+    message.set_content(body_text)
+    message['To'] = to
+    message['From'] = 'me'
+    message['Subject'] = subject
+
+    # Add file if needed
+    if attachment_path and os.path.exists(attachment_path):
+        with open(attachment_path, 'rb') as f:
+            file_data = f.read()
+            file_name = os.path.basename(attachment_path)
+        message.add_attachment(file_data, maintype='application',
+                               subtype='octet-stream', filename=file_name)
+
+    encoded_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
+    create_message = {
+        'raw': encoded_message
+    }
+    
+    send_message = service.users().messages().send(userId="me", body=create_message).execute()
+    print(f"✅ Message Id: {send_message['id']}")
+    return send_message
