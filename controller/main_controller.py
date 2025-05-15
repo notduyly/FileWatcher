@@ -3,22 +3,23 @@ import os
 
 from model.fileWatcher import FileWatcher
 from model.eventHandler import MyEventHandler
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
 
 class WatcherController:
     def __init__(self):
         self.watcher = None
         self.view = None
-        self.watch_directory = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "testFileToWatch")
+        self.watch_directory = ''
 
     def set_view(self, view):
         self.view = view
 
     def start_watching(self):
-        handler = MyEventHandler(logToTextbox=self.view.add_log)
-        self.watcher = FileWatcher(self.watch_directory, handler)
-        self.watcher.start()
-        print(f"Started watching directory: {self.watch_directory}")
+        for file in self.watch_directory:
+            handler = MyEventHandler(logToTextbox=self.view.add_log)
+            self.watcher = FileWatcher(file, handler)
+            self.watcher.start()
+            print(f"Started watching directory: {self.watch_directory}")
     
     def stop_watching(self):
         if self.watcher:
@@ -26,6 +27,13 @@ class WatcherController:
             print("Stopped watching")
 
     def open_directory(self):
-        directory = filedialog.askdirectory()
+        choice = messagebox.askyesno("Selection Type", 
+                                "Would you like to select a file?\n\nYes = Select File\nNo = Select Directory")
+        print(choice)
+        if choice:  # User wants to select a file
+            directory = filedialog.askopenfilenames(title="Select File to Watch")
+        else:  # User wants to select a directory
+            directory = filedialog.askdirectory(title="Select Directory to Watch")
+
         if directory:
-            print(f"Selected directory: {directory}")
+            self.watch_directory = directory
