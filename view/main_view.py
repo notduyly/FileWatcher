@@ -9,7 +9,7 @@ class FileWatcherGUI:
     def __init__(self, root, controller):
         self.controller = controller
         self.window = setupWindow(root, controller)
-        self.menubar = MenuBar(root)
+        self.menubar = MenuBar(root, controller)
 
         root.config(menu=self.menubar.get_menubar())
         controller.set_view(self)
