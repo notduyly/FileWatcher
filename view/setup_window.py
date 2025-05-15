@@ -11,7 +11,7 @@ class setupWindow:
         root.title('File System Watcher')
         root.geometry('500x500')
 
-        # Start/Stop button
+        # Start/Stop and Directory buttons
         start_button = tk.Button(
             self.root,
             text='Start',
@@ -26,6 +26,15 @@ class setupWindow:
             command=self.controller.stop_watching
         )
         stop_button.pack(padx=10, pady=20)
+
+        open_directory_button = tk.Button(
+            self.root,
+            text='Open Directory',
+            font=('Arial', 20),
+            command=self.controller.open_directory
+        )
+        open_directory_button.pack(padx=10, pady=20)
+
 
         # Dropwdown menu to choose which file extension
         self.fileExtensionSelection = tk.StringVar(value='None')
