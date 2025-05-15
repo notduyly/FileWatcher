@@ -8,21 +8,21 @@ class QueryWindow(tk.Toplevel):
         super().__init__(master)
         self.title("QueryForm")
         self.geometry("800x400")
-
+        
         self.db_results = db_results
-
+        
         columns = ("ID", "Extension", "Filename", "PATH", "Event", "Date/Time")
         self.tree = ttk.Treeview(self, columns=columns, show="headings")
         for col in columns:
             self.tree.heading(col, text=col)
             self.tree.column(col, width=100)
-
+            
         self.tree.pack(fill="both", expand=True, padx=10, pady=10)
         self.populate_table()
         
         bottom_frame = tk.Frame(self)
         bottom_frame.pack(pady=10)
-
+        
         # Export to CSV
         export_btn = tk.Button(bottom_frame, text="Export to CSV", command=self.export_to_csv)
         export_btn.grid(row=0, column=0, padx=5)
@@ -52,7 +52,7 @@ class QueryWindow(tk.Toplevel):
                 for row in self.db_results:
                     writer.writerow(row)
             messagebox.showinfo("Success", f"CSV exported to {file_path}")
-            self.last_exported_file = file_path  # 저장 위치 기억
+            self.last_exported_file = file_path
 
         except Exception as e:
             messagebox.showerror("Error", f"Failed to export CSV: {e}")
@@ -62,13 +62,12 @@ class QueryWindow(tk.Toplevel):
         if not recipient:
             messagebox.showwarning("Input Error", "Please enter recipient email.")
             return
-
+        
         if not hasattr(self, "last_exported_file"):
             messagebox.showwarning("Missing File", "Please export to CSV first.")
             return
-
+        
         try:
-            # 실제 전송
             sender = EmailSender(sender_email="your@email.com", password="your_app_password")
             subject = "File Watcher Query Result"
             body = "Please find the attached CSV file of the query result."
@@ -79,11 +78,11 @@ class QueryWindow(tk.Toplevel):
                 body=body,
                 attachment_path=self.last_exported_file
             )
-
+            
             if success:
                 messagebox.showinfo("Success", "Email sent successfully.")
             else:
                 messagebox.showerror("Failure", "Failed to send email.")
-
+                
         except Exception as e:
             messagebox.showerror("Error", f"Error sending email: {e}")
