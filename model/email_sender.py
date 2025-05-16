@@ -33,7 +33,6 @@ def send_email(service, to, subject, body_text, attachment_path=None):
     message['From'] = 'me'
     message['Subject'] = subject
 
-    # Add file if needed
     if attachment_path and os.path.exists(attachment_path):
         with open(attachment_path, 'rb') as f:
             file_data = f.read()
@@ -50,6 +49,10 @@ def send_email(service, to, subject, body_text, attachment_path=None):
     print(f"✅ Message Id: {send_message['id']}")
     return send_message
 
+
+
+
+# test
 def send_email_with_csv(service, to: str, subject: str, body_text: str, csv_data: list, 
                        csv_filename: str = "export.csv") -> dict:
     """
