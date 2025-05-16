@@ -56,7 +56,7 @@ class setupWindow:
 
 
     def add_log(self, message: str):
-        arr = message.split()
+        arr = message.split(': ', 1)
         
         event_type = arr[0]
         file_path = arr[1]

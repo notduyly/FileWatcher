@@ -28,7 +28,7 @@ class WatcherController:
 
     def open_directory(self):
         choice = messagebox.askyesno("Selection Type", 
-                                "Would you like to select a file?\n\nYes = Select File\nNo = Select Directory")
+                                    "Would you like to select a file?\n\nYes = Select File\nNo = Select Directory")
         print(choice)
         if choice:  # User wants to select a file
             directory = filedialog.askopenfilenames(title="Select File to Watch")
