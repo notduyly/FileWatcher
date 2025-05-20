@@ -9,7 +9,7 @@ class WatcherController:
     def __init__(self):
         self.watcher = None
         self.view = None
-        self.watch_directory = ''
+        self.watch_directory = None
 
     def set_view(self, view):
         self.view = view
@@ -29,11 +29,10 @@ class WatcherController:
     def open_directory(self):
         choice = messagebox.askyesno("Selection Type", 
                                     "Would you like to select a file?\n\nYes = Select File\nNo = Select Directory")
-        print(choice)
+
         if choice:  # User wants to select a file
             directory = filedialog.askopenfilenames(title="Select File to Watch")
+            self.watch_directory = list(directory)
         else:  # User wants to select a directory
             directory = filedialog.askdirectory(title="Select Directory to Watch")
-
-        if directory:
-            self.watch_directory = directory
+            self.watch_directory = [directory]
