@@ -28,4 +28,5 @@ class WatcherController:
     def open_directory(self):
         directory = filedialog.askdirectory()
         if directory:
+            self.watch_directory = directory
             print(f"Selected directory: {directory}")
