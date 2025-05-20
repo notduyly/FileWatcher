@@ -35,10 +35,10 @@ class MyEventHandler(FileSystemEventHandler):
         return super().on_deleted(theEvent)
 
     def dispatch(self, theEvent):
-        # Process the event if it matches the extension
+        # Log the event if it matches the extension
         if self.myExtensionFilter and self.myExtensionFilter != 'None':
             if theEvent.src_path.lower().endswith(self.myExtensionFilter.lower()):
                 return super().dispatch(theEvent)
         else: 
-            # Process all events if there are not extension
+            # Log all events if there are no extension
             return super().dispatch(theEvent)
