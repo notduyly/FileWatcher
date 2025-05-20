@@ -1,13 +1,13 @@
 import sys
 import os
 import csv
-
+from tkinter import filedialog
 from model.fileWatcher import FileWatcher
 from model.eventHandler import MyEventHandler
 from model.db_handler import (fetch_all_events, fetch_event_by_type,
-                            fetch_event_by_extension, fetch_event_by_after_date)
-from tkinter import filedialog
-# from model.email_sender import EmailSender
+                            fetch_event_by_extension, fetch_event_by_after_date,
+                            export_to_csv as db_export_to_csv, 
+                            reset_db, init_event_table)  # init_event_table 추가
 
 class WatcherController:
     def __init__(self):
@@ -34,26 +34,23 @@ class WatcherController:
         if directory:
             print(f"Selected directory: {directory}")
 
-    def query_events(self, extension=None, start_date=None):
-        """Query events from database based on filters"""
-        if start_date:
-            results = fetch_event_by_after_date(start_date)
+    def query_events(self, query_type: str = None, extension: str = None, start_date: str = None):
+        """
+        Query events from database based on different criteria
+        """
+        if query_type == "event_type":
+            return fetch_event_by_type()
+        elif query_type == "extension":
+            return fetch_event_by_extension()
+        elif query_type == "date":
+            return fetch_event_by_after_date(start_date)
         else:
-            results = fetch_all_events()
-            
-        if extension and extension != "All":
-            results = [r for r in results if r[2] == extension]
-            
-        return results
+            return fetch_all_events()
     
     def export_to_csv(self, file_path: str, data: list) -> bool:
         """Export data to CSV file"""
         try:
-            with open(file_path, mode="w", newline="", encoding="utf-8") as f:
-                writer = csv.writer(f)
-                writer.writerow(["ID", "Extension", "Filename", "PATH", "Event", "Date/Time"])
-                for row in data:
-                    writer.writerow(row)
+            db_export_to_csv(file_path)
             return True
         except Exception as e:
             print(f"Export error: {e}")
@@ -72,4 +69,14 @@ class WatcherController:
             )
         except Exception as e:
             print(f"Email error: {e}")
+            return False
+
+    def reset_database(self) -> bool:
+        """Reset the database by dropping and recreating the events table"""
+        try:
+            reset_db()
+            init_event_table()
+            return True
+        except Exception as e:
+            print(f"Database reset error: {e}")
             return False

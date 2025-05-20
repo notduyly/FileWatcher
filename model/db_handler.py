@@ -14,10 +14,13 @@ def init_event_table():
                 CREATE TABLE IF NOT EXISTS events (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     filename TEXT NOT NULL,
+                    file_path TEXT NOT NULL,
                     file_extension TEXT NOT NULL,
+                    event TEXT NOT NULL,
                     event_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-                    file_size INTEGER NOT NULL,
-                    event TEXT NOT NULL
+                    file_size INTEGER,
+                    is_directory BOOLEAN,
+                    user TEXT
                 )
             ''')
 
@@ -34,13 +37,13 @@ def insert_event(event_type, file_path, is_directory=False):
         with conn:
             conn.execute("""
                 INSERT INTO events (
-                    timestamp, event_type, file_path, file_name,
-                    file_extension, file_size, is_directory, user
+                    filename, file_path, file_extension, event,
+                    event_timestamp, file_size, is_directory, user
                 )
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """, (
-                timestamp, event_type, file_path, file_name,
-                file_extension, file_size, is_directory, user
+                file_name, file_path, file_extension, event_type,
+                timestamp, file_size, is_directory, user
             ))
 
 def delete_event(theEventId: int):
@@ -55,8 +58,6 @@ def reset_db():
         if conn is None:
             return
         with conn:
-            conn.execute('DROP TABLE IF EXISTS users')
-            conn.execute('DROP TABLE IF EXISTS posts')
             conn.execute('DROP TABLE IF EXISTS events')
 
 def fetch_all_events():
@@ -93,11 +94,14 @@ def fetch_event_by_after_date(theDate: str):
 
 def export_to_csv(theFilename: str):
     events = fetch_all_events()
-    with open(theFilename, mode='w', newline='') as file:
+    with open(theFilename, mode='w', newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
-        writer.writerow(['ID', 'Filename', 'File Extension', 'Event Timestamp', 'File Size', 'Event'])
+        writer.writerow([
+            'ID', 'Filename', 'File Path', 'File Extension',
+            'Event', 'Event Timestamp', 'File Size', 'Is Directory', 'User'
+        ])
         writer.writerows(events)
-    print(f"Data exported to {theFilename} successfully.")
+    print(f"✅ Data exported to {theFilename} successfully.")
 
 def get_event_count():
     with get_connection() as conn:
