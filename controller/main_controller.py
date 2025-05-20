@@ -7,7 +7,7 @@ from model.eventHandler import MyEventHandler
 from model.db_handler import (fetch_all_events, fetch_event_by_type,
                             fetch_event_by_extension, fetch_event_by_after_date,
                             export_to_csv as db_export_to_csv, 
-                            reset_db, init_event_table)  # init_event_table 추가
+                            reset_db, init_event_table)
 
 class WatcherController:
     def __init__(self):
