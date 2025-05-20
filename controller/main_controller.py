@@ -7,7 +7,7 @@ from model.eventHandler import MyEventHandler
 from model.db_handler import (fetch_all_events, fetch_event_by_type,
                             fetch_event_by_extension, fetch_event_by_after_date)
 from tkinter import filedialog
-from model.email_sender import EmailSender
+# from model.email_sender import EmailSender
 
 class WatcherController:
     def __init__(self):
