@@ -17,6 +17,10 @@ class WatcherController:
 
     def start_watching(self):
         handler = MyEventHandler(logToTextbox=self.view.add_log)
+
+        if self.file_extension and self.file_extension != 'None':
+            handler.set_extension_filter(self.file_extension)
+
         self.watcher = FileWatcher(self.watch_directory, handler)
         self.watcher.start()
         print(f"Started watching directory: {self.watch_directory}")

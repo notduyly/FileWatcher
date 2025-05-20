@@ -11,11 +11,11 @@ class MyEventHandler(FileSystemEventHandler):
     def __init__(self, logToTextbox=None):
         super().__init__()
         self.myLogToTextbox = logToTextbox
-        self.myExtensioFilter = ''
+        self.myExtensionFilter = ''
 
     def set_extension_filter(self, theExtension):
-        self.myExtensioFilter = theExtension
-        
+        self.myExtensionFilter = theExtension
+
     def on_modified(self, theEvent):
         msg = f'Modified {theEvent.src_path}'
         if self.myLogToTextbox:
@@ -35,4 +35,10 @@ class MyEventHandler(FileSystemEventHandler):
         return super().on_deleted(theEvent)
 
     def dispatch(self, theEvent):
-        return super().dispatch(theEvent)
+        # Process the event if it matches the extension
+        if self.myExtensionFilter and self.myExtensionFilter != 'None':
+            if theEvent.src_path.lower().endswith(self.myExtensionFilter.lower()):
+                return super().dispatch(theEvent)
+        else: 
+            # Process all events if there are not extension
+            return super().dispatch(theEvent)
