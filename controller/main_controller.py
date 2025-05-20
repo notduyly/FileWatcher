@@ -9,7 +9,8 @@ class WatcherController:
     def __init__(self):
         self.watcher = None
         self.view = None
-        self.watch_directory = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "testFileToWatch")
+        self.watch_directory = ''
+        self.file_extension = ''
 
     def set_view(self, view):
         self.view = view
@@ -30,3 +31,8 @@ class WatcherController:
         if directory:
             self.watch_directory = directory
             print(f"Selected directory: {directory}")
+    
+    def set_file_extension(self, extension):
+        self.file_extension = extension
+        print(f"Selected extension filter: {extension}")
+        print(self.watch_directory)

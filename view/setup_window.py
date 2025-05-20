@@ -3,35 +3,35 @@ from tkinter import ttk
 import os
 import datetime
 class setupWindow:
-    def __init__(self, root, controller):
-        self.root = root
-        self.controller = controller
+    def __init__(self, theRoot, theController):
+        self.myRoot = theRoot
+        self.myController = theController
 
         # Init Window
-        root.title('File System Watcher')
-        root.geometry('800x800')
+        theRoot.title('File System Watcher')
+        theRoot.geometry('800x800')
 
         # Start/Stop and Directory buttons
         start_button = tk.Button(
-            self.root,
+            self.myRoot,
             text='Start',
             font=('Arial', 20),
-            command=controller.start_watching
+            command=theController.start_watching
         )
         start_button.pack(padx=10, pady=10)
         stop_button = tk.Button(
-            self.root,
+            self.myRoot,
             text='Stop',
             font=('Arial', 20),
-            command=self.controller.stop_watching
+            command=self.myController.stop_watching
         )
         stop_button.pack(padx=10, pady=20)
 
         open_directory_button = tk.Button(
-            self.root,
+            self.myRoot,
             text='Open Directory',
             font=('Arial', 20),
-            command=self.controller.open_directory
+            command=self.myController.open_directory
         )
         open_directory_button.pack(padx=10, pady=20)
 
@@ -39,7 +39,7 @@ class setupWindow:
         # Dropwdown menu to choose which file extension
         self.fileExtensionSelection = tk.StringVar(value='None')
         self.fileExtensionOptions = ['None', '.png', '.txt']
-        self.fileExtensionDropdown = tk.OptionMenu(root, 
+        self.fileExtensionDropdown = tk.OptionMenu(theRoot, 
                                             self.fileExtensionSelection, 
                                             *[opt for opt in self.fileExtensionOptions if opt != self.fileExtensionSelection.get()])
         
@@ -48,15 +48,15 @@ class setupWindow:
 
         # TextBox to show changes
         cols = ("Filename","Extension","Path","Event","Timestamp")
-        self.tree = ttk.Treeview(root, columns=cols, show='headings')
+        self.tree = ttk.Treeview(theRoot, columns=cols, show='headings')
         for col in cols:
             self.tree.heading(col, text=col)
             self.tree.column(col, width=120, anchor=tk.W)
         self.tree.pack(fill=tk.BOTH, expand=True)
 
 
-    def add_log(self, message: str):
-        arr = message.split()
+    def add_log(self, theMessage: str):
+        arr = theMessage.split()
         
         event_type = arr[0]
         file_path = arr[1]
@@ -78,6 +78,7 @@ class setupWindow:
     def handle_fileExtension_change(self, *args):
         curr_selection = self.fileExtensionSelection.get()
 
+        self.myController.set_file_extension(curr_selection)
         # Recreate the menu with options that is not selected
         options = [opt for opt in self.fileExtensionOptions if opt != curr_selection]
         menu = self.fileExtensionDropdown['menu']
