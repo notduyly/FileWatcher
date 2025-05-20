@@ -9,7 +9,7 @@ class WatcherController:
     def __init__(self):
         self.watcher = None
         self.view = None
-        self.watch_directory = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "testFileToWatch")
+        self.watch_directory = ''
 
     def set_view(self, view):
         self.view = view
