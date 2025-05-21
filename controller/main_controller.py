@@ -7,36 +7,37 @@ from tkinter import filedialog
 
 class WatcherController:
     def __init__(self):
-        self.watcher = None
-        self.view = None
-        self.watch_directory = ''
-        self.file_extension = ''
+        self.myWatcher = None
+        self.myView = None
+        self.myWatchDirectory = ''
+        self.myFileExtension = ''
 
     def set_view(self, view):
-        self.view = view
+        self.myView = view
 
     def start_watching(self):
-        handler = MyEventHandler(logToTextbox=self.view.add_log)
+        handler = MyEventHandler(logToTextbox=self.myView.add_log)
 
-        if self.file_extension and self.file_extension != 'None':
-            handler.set_extension_filter(self.file_extension)
+        if self.myFileExtension and self.myFileExtension != 'None':
+            handler.set_extension_filter(self.myFileExtension)
 
-        self.watcher = FileWatcher(self.watch_directory, handler)
-        self.watcher.start()
-        print(f"Started watching directory: {self.watch_directory}")
+        self.myWatcher = FileWatcher(self.myWatchDirectory, handler)
+        self.myWatcher.start()
+        print(f"Started watching directory: {self.myWatchDirectory}")
     
     def stop_watching(self):
-        if self.watcher:
-            self.watcher.stop()
+        if self.myWatcher:
+            self.myWatcher.stop()
             print("Stopped watching")
 
     def open_directory(self):
         directory = filedialog.askdirectory()
         if directory:
-            self.watch_directory = directory
+            self.myWatchDirectory = directory
+            self.myView.update_directory_display(directory)
             print(f"Selected directory: {directory}")
     
-    def set_file_extension(self, extension):
-        self.file_extension = extension
-        print(f"Selected extension filter: {extension}")
-        print(self.watch_directory)
+    def set_file_extension(self, theExtension):
+        self.myFileExtension = theExtension
+        print(f"Selected extension filter: {theExtension}")
+        print(self.myWatchDirectory)

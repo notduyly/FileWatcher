@@ -12,3 +12,6 @@ class FileWatcherGUI:
 
     def add_log(self, theMessage):
         self.myWindow.add_log(theMessage)
+
+    def update_directory_display(self, theDirectory):
+        self.myWindow.update_directory_display(theDirectory)

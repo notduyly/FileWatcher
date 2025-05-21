@@ -27,6 +27,7 @@ class setupWindow:
         )
         stop_button.pack(padx=10, pady=20)
 
+        # Directory
         open_directory_button = tk.Button(
             self.myRoot,
             text='Open Directory',
@@ -34,12 +35,19 @@ class setupWindow:
             command=self.myController.open_directory
         )
         open_directory_button.pack(padx=10, pady=20)
-
+        self.directory_label = tk.Label(
+            self.myRoot,
+            text='No directory selected',
+            padx=5,
+            pady=5,
+            width=70
+        )
+        self.directory_label.pack(padx=10, pady=10)
 
         # Dropwdown menu to choose which file extension
         self.fileExtensionSelection = tk.StringVar(value='None')
         self.fileExtensionOptions = ['None', '.png', '.txt']
-        self.fileExtensionDropdown = tk.OptionMenu(theRoot, 
+        self.fileExtensionDropdown = tk.OptionMenu(self.myRoot, 
                                             self.fileExtensionSelection, 
                                             *[opt for opt in self.fileExtensionOptions if opt != self.fileExtensionSelection.get()])
         
@@ -48,7 +56,7 @@ class setupWindow:
 
         # TextBox to show changes
         cols = ("Filename","Extension","Path","Event","Timestamp")
-        self.tree = ttk.Treeview(theRoot, columns=cols, show='headings')
+        self.tree = ttk.Treeview(self.myRoot, columns=cols, show='headings')
         for col in cols:
             self.tree.heading(col, text=col)
             self.tree.column(col, width=120, anchor=tk.W)
@@ -91,3 +99,8 @@ class setupWindow:
                 value=option: self.fileExtensionSelection.set(value)
             )
     
+    def update_directory_display(self, theDirectory):
+        if theDirectory:
+            self.directory_label.config(text=f"Selected directory: {theDirectory}")
+        else:
+            self.directory_label.config(text="No directory selected")
