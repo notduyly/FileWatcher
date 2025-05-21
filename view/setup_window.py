@@ -62,17 +62,22 @@ class setupWindow:
         self.tree = ttk.Treeview(self.myRoot, columns=cols, show='headings')
         for col in cols:
             self.tree.heading(col, text=col)
-            self.tree.column(col, width=120, anchor=tk.W)
+            
+        self.tree.column("Filename", width=75, anchor=tk.W)
+        self.tree.column("Extension", width=75, anchor=tk.W)
+        self.tree.column("Path", width=400, anchor=tk.W)
+        self.tree.column("Event", width=100, anchor=tk.W)
+        self.tree.column("Timestamp", width=150, anchor=tk.W)
+        
         self.tree.pack(fill=tk.BOTH, expand=True)
 
 
     def add_log(self, theMessage: str):
         arr = theMessage.split(': ')
-        print(arr)
+
         event_type = arr[0]
         file_path = arr[1]
         
-        print(file_path)
         filename, extension = os.path.splitext(os.path.basename(file_path))
         if not extension:
             extension = "(none)"
