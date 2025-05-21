@@ -4,6 +4,7 @@ import os
 from model.fileWatcher import FileWatcher
 from model.eventHandler import MyEventHandler
 from tkinter import filedialog, messagebox
+import tkinter as tk
 
 class WatcherController:
     def __init__(self):
@@ -38,3 +39,14 @@ class WatcherController:
                 
             self.watch_directory = [directory]
             self.start_watching()
+
+    def open_query_window(self):
+        """Open database query window"""
+        from view.query_window import QueryWindow
+        if hasattr(self, 'query_window') and self.query_window is not None:
+            try:
+                self.query_window.focus()
+            except tk.TclError:
+                self.query_window = QueryWindow(self.view.root, self)
+        else:
+            self.query_window = QueryWindow(self.view.root, self)

@@ -7,6 +7,7 @@ from .setup_window import setupWindow
 
 class FileWatcherGUI:
     def __init__(self, root, controller):
+        self.root = root
         self.controller = controller
         self.window = setupWindow(root, controller)
         self.menubar = MenuBar(root)

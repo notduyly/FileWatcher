@@ -40,6 +40,14 @@ class setupWindow:
         )
         open_directory_button.pack(padx=10, pady=20)
 
+        query_button = tk.Button(
+            self.root,
+            text='Query Database',
+            font=('Arial', 20),
+            command=self.controller.open_query_window
+        )
+        query_button.pack(padx=10, pady=20)
+
         # Dropdown menu to choose which file extension
         self.fileExtensionSelection = tk.StringVar(value='None')
         self.fileExtensionOptions = ['None', '.png', '.txt']
