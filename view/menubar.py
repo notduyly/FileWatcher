@@ -1,6 +1,5 @@
 import tkinter as tk
 from tkinter import Menu
-from .query_window import QueryWindow
 
 class MenuBar:
     
