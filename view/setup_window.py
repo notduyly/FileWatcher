@@ -57,21 +57,9 @@ class setupWindow:
             self.tree.column(col, width=120, anchor=tk.W)
         self.tree.pack(fill=tk.BOTH, expand=True)
 
-        # Directory contents display
-        self.directory_tree = ttk.Treeview(root, columns=("Filename", "Extension", "Size", "Modified"), show='headings')
-        for col in ["Filename", "Extension", "Size", "Modified"]:
-            self.directory_tree.heading(col, text=col)
-            self.directory_tree.column(col, width=120, anchor=tk.W)
-        self.directory_tree.pack(fill=tk.BOTH, expand=True, pady=10)
-
         # Separate section for file system events
         ttk.Label(root, text="File System Events", font=('Arial', 12, 'bold')).pack(pady=5)
         self.tree.pack(fill=tk.BOTH, expand=True)
-
-        # 현재 감시 중인 디렉토리 표시
-        self.watch_label = ttk.Label(root, text="Not watching any directory", 
-                               font=('Arial', 10))
-        self.watch_label.pack(pady=5)
 
     def add_log(self, message: str):
         arr = message.split(': ', 1)
