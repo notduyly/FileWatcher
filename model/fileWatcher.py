@@ -13,7 +13,6 @@ class FileWatcher:
             self.observer = Observer()
             self.observer.schedule(self.handler, self.directory, recursive=True)
             self.observer.start()
-            print(f"Started watching {self.directory} and its subdirectories")
         except Exception as e:
             print(f"Error starting observer: {e}")
         
