@@ -5,8 +5,6 @@ logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S')
 
-# Inherits from FileSystemEventHandler. We override these
-# methods to handle how we react to file changes.
 class MyEventHandler(FileSystemEventHandler):
     def __init__(self, logToTextbox=None):
         super().__init__()
