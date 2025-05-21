@@ -40,7 +40,10 @@ class setupWindow:
             text='No directory selected',
             padx=5,
             pady=5,
-            width=70
+            width=70,
+            relief=tk.GROOVE,
+            borderwidth=2,
+            background='white',
         )
         self.directory_label.pack(padx=10, pady=10)
 
@@ -64,8 +67,8 @@ class setupWindow:
 
 
     def add_log(self, theMessage: str):
-        arr = theMessage.split()
-        
+        arr = theMessage.split(': ')
+        print(arr)
         event_type = arr[0]
         file_path = arr[1]
         

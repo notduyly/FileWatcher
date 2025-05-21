@@ -17,19 +17,19 @@ class MyEventHandler(FileSystemEventHandler):
         self.myExtensionFilter = theExtension
 
     def on_modified(self, theEvent):
-        msg = f'Modified {theEvent.src_path}'
+        msg = f'Modified: {theEvent.src_path}'
         if self.myLogToTextbox:
             self.myLogToTextbox(msg)
         return super().on_modified(theEvent)
     
     def on_created(self, theEvent):
-        msg = f'Created {theEvent.src_path}'
+        msg = f'Created: {theEvent.src_path}'
         if self.myLogToTextbox:
             self.myLogToTextbox(msg)
         return super().on_created(theEvent)
     
     def on_deleted(self, theEvent):
-        msg = f'Deleted {theEvent.src_path}'
+        msg = f'Deleted: {theEvent.src_path}'
         if self.myLogToTextbox:
             self.myLogToTextbox(msg)
         return super().on_deleted(theEvent)
