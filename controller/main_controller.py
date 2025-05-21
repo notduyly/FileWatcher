@@ -7,48 +7,37 @@ from tkinter import filedialog, messagebox
 
 class WatcherController:
     def __init__(self):
-        self.watcher = None
-        self.view = None
-        self.watch_directory = ''
+        self.myWatcher = None
+        self.myView = None
+        self.myWatchDirectory = ''
+        self.myFileExtension = ''
 
     def set_view(self, view):
-        self.view = view
+        self.myView = view
 
     def start_watching(self):
-        if self.watcher:
-            print("Already watching.")
-            return
-        for file in self.watch_directory:
-            handler = MyEventHandler(logToTextbox=self.view.add_log)
-            self.watcher = FileWatcher(file, handler)
-            self.watcher.start()
-            print(f"Started watching directory: {self.watch_directory}")
+        handler = MyEventHandler(logToTextbox=self.myView.add_log)
+
+        if self.myFileExtension and self.myFileExtension != 'None':
+            handler.set_extension_filter(self.myFileExtension)
+
+        self.myWatcher = FileWatcher(self.myWatchDirectory, handler)
+        self.myWatcher.start()
+        print(f"Started watching directory: {self.myWatchDirectory}")
     
     def stop_watching(self):
-        if self.watcher:
-            self.watcher.stop()
-            self.watcher = None
+        if self.myWatcher:
+            self.myWatcher.stop()
             print("Stopped watching")
 
     def open_directory(self):
         directory = filedialog.askdirectory()
         if directory:
-            # 이전 감시 중지
-            if self.watcher:
-                self.stop_watching()
-                
-            self.watch_directory = [directory]
-            if self.view:
-                self.view.update_directory_view(directory)
-                
-            # 하위 디렉토리 포함하여 감시 시작
-            handler = MyEventHandler(logToTextbox=self.view.add_log)
-            self.watcher = FileWatcher(directory, handler)
-            self.watcher.start()
-            
-            # 하위 디렉토리 정보 출력
-            subdirs = [x[0] for x in os.walk(directory)][1:]
-            if subdirs:
-                print(f"Including subdirectories:")
-                for subdir in subdirs:
-                    print(f" - {os.path.basename(subdir)}")
+            self.myWatchDirectory = directory
+            self.myView.update_directory_display(directory)
+            print(f"Selected directory: {directory}")
+    
+    def set_file_extension(self, theExtension):
+        self.myFileExtension = theExtension
+        print(f"Selected extension filter: {theExtension}")
+        print(self.myWatchDirectory)

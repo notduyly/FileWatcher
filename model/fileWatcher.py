@@ -3,25 +3,21 @@ from watchdog.observers import Observer
 from watchdog.events import LoggingEventHandler
 
 class FileWatcher:
-    def __init__(self, directory, handler):
-        self.directory = directory
-        self.handler = handler
-        self.observer = None
-
+    def __init__(self, thePath, theEventHandler=LoggingEventHandler(), theRecursive=True):
+        self.myPath = thePath
+        self.myEventHandler = theEventHandler
+        self.myRecursive = theRecursive
+        self.myObserver = None
+    
     def start(self):
-        try:
-            self.observer = Observer()
-            # recursive=True로 설정하여 하위 디렉토리도 감시
-            self.observer.schedule(self.handler, self.directory, recursive=True)
-            self.observer.start()
-            print(f"Started watching {self.directory} and its subdirectories")
-        except Exception as e:
-            print(f"Error starting observer: {e}")
+        self.myObserver = Observer()
+        self.myObserver.schedule(self.myEventHandler, self.myPath, recursive=self.myRecursive)
+        self.myObserver.start()
         
     def stop(self):
-        if self.observer:
-            self.observer.stop()
-            self.observer.join()
+        if self.myObserver:
+            self.myObserver.stop()
+            self.myObserver.join()
     
     def run(self):
         try:
