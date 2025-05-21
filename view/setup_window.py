@@ -151,15 +151,6 @@ class setupWindow:
                         size,
                         modified
                     ))
-                    
-            # 감시 중인 디렉토리 레이블 업데이트
-            subdir_count = len([x[0] for x in os.walk(directory)][1:])
-            if subdir_count > 0:
-                self.watch_label.config(
-                    text=f"Watching: {directory}\nIncluding {subdir_count} subdirectories"
-                )
-            else:
-                self.watch_label.config(text=f"Watching: {directory}")
                 
         except Exception as e:
             print(f"Error updating directory view: {e}")
