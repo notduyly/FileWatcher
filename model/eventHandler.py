@@ -12,20 +12,20 @@ class MyEventHandler(FileSystemEventHandler):
         super().__init__()
         self.logToTextbox = logToTextbox
     
-    def on_modified(self, event):
-        msg = f'Modified: {event.src_path}'
+    def _log_event(self, event_type, path):
+        """Common logging function"""
+        msg = f'{event_type}: {path}'
         if self.logToTextbox:
             self.logToTextbox(msg)
+    
+    def on_modified(self, event):
+        self._log_event('Modified', event.src_path)
         return super().on_modified(event)
     
     def on_created(self, event):
-        msg = f'Created: {event.src_path}'
-        if self.logToTextbox:
-            self.logToTextbox(msg)
+        self._log_event('Created', event.src_path)
         return super().on_created(event)
     
     def on_deleted(self, event):
-        msg = f'Deleted: {event.src_path}'
-        if self.logToTextbox:
-            self.logToTextbox(msg)
+        self._log_event('Deleted', event.src_path)
         return super().on_deleted(event)

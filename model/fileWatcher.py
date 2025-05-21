@@ -11,10 +11,8 @@ class FileWatcher:
     def start(self):
         try:
             self.observer = Observer()
-            # recursive=True로 설정하여 하위 디렉토리도 감시
             self.observer.schedule(self.handler, self.directory, recursive=True)
             self.observer.start()
-            print(f"Started watching {self.directory} and its subdirectories")
         except Exception as e:
             print(f"Error starting observer: {e}")
         

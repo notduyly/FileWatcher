@@ -9,57 +9,67 @@ class setupWindow:
         self.root = root
         self.controller = controller
         self.log_queue = queue.Queue()
-        self.root.after(100, self.process_log_queue)
-
+        
         # Init Window
-        root.title('File System Watcher')
-        root.geometry('800x800')
-
-        # Start/Stop and Directory buttons
-        start_button = tk.Button(
-            self.root,
-            text='Start',
-            font=('Arial', 20),
-            command=controller.start_watching
-        )
-        start_button.pack(padx=10, pady=10)
-
-        stop_button = tk.Button(
-            self.root,
-            text='Stop',
-            font=('Arial', 20),
-            command=self.controller.stop_watching
-        )
-        stop_button.pack(padx=10, pady=20)
-
-        open_directory_button = tk.Button(
-            self.root,
-            text='Open Directory',
-            font=('Arial', 20),
-            command=self.controller.open_directory
-        )
-        open_directory_button.pack(padx=10, pady=20)
-
-        # Dropdown menu to choose which file extension
+        self._init_window()
+        # Setup UI Components
+        self._setup_buttons()
+        self._setup_file_extension_dropdown()
+        self._setup_treeview()
+        
+        # Start queue processing
+        self.root.after(100, self.process_log_queue)
+        
+    def _init_window(self):
+        """Initialize window properties"""
+        self.root.title('File System Watcher')
+        self.root.geometry('800x800')
+        
+    def _setup_buttons(self):
+        """Setup control buttons"""
+        buttons = [
+            ('Start', self.controller.start_watching),
+            ('Stop', self.controller.stop_watching),
+            ('Open Directory', self.controller.open_directory)
+        ]
+        
+        for text, command in buttons:
+            tk.Button(
+                self.root,
+                text=text,
+                font=('Arial', 20),
+                command=command
+            ).pack(padx=10, pady=10)
+            
+    def _setup_file_extension_dropdown(self):
+        """Setup file extension dropdown"""
         self.fileExtensionSelection = tk.StringVar(value='None')
         self.fileExtensionOptions = ['None', '.png', '.txt']
-        self.fileExtensionDropdown = tk.OptionMenu(root,
-                                                   self.fileExtensionSelection,
-                                                   *[opt for opt in self.fileExtensionOptions if opt != self.fileExtensionSelection.get()])
+        self.fileExtensionDropdown = tk.OptionMenu(
+            self.root,
+            self.fileExtensionSelection,
+            *self.fileExtensionOptions
+        )
         self.fileExtensionDropdown.pack(padx=10, pady=10)
         self.fileExtensionSelection.trace_add('write', self.handle_fileExtension_change)
-
-        # TextBox to show changes
+        
+    def _setup_treeview(self):
+        """Setup treeview for event logging"""
         cols = ("Filename", "Extension", "Path", "Event", "Timestamp")
-        self.tree = ttk.Treeview(root, columns=cols, show='headings')
+        self.tree = ttk.Treeview(self.root, columns=cols, show='headings')
+        
+        # Configure columns
         for col in cols:
             self.tree.heading(col, text=col)
             self.tree.column(col, width=120, anchor=tk.W)
-        self.tree.pack(fill=tk.BOTH, expand=True)
-
-        # Separate section for file system events
-        ttk.Label(root, text="File System Events", font=('Arial', 12, 'bold')).pack(pady=5)
-        self.tree.pack(fill=tk.BOTH, expand=True)
+            
+        # Add scrollbar
+        scrollbar = ttk.Scrollbar(self.root, orient="vertical", command=self.tree.yview)
+        self.tree.configure(yscrollcommand=scrollbar.set)
+        
+        # Pack components
+        self.tree.pack(side="left", fill=tk.BOTH, expand=True)
+        scrollbar.pack(side="right", fill="y")
 
     def add_log(self, message: str):
         arr = message.split(': ', 1)
@@ -151,15 +161,6 @@ class setupWindow:
                         size,
                         modified
                     ))
-                    
-            # 감시 중인 디렉토리 레이블 업데이트
-            subdir_count = len([x[0] for x in os.walk(directory)][1:])
-            if subdir_count > 0:
-                self.watch_label.config(
-                    text=f"Watching: {directory}\nIncluding {subdir_count} subdirectories"
-                )
-            else:
-                self.watch_label.config(text=f"Watching: {directory}")
                 
         except Exception as e:
             print(f"Error updating directory view: {e}")
