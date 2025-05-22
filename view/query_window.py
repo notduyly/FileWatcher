@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
-from email import EmailSender  # 위에서 만든 클래스
+from email import EmailSender
 import csv
 
 class QueryWindow(tk.Toplevel):
