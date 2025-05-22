@@ -38,7 +38,6 @@ class WatcherController:
                 self.stop_watching()
                 
             self.watch_directory = [directory]
-            self.start_watching()
 
     def open_query_window(self):
         """Open database query window"""
