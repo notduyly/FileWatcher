@@ -1,18 +1,17 @@
-import tkinter as tk
-import sys
-import os
-
 from view.menubar import MenuBar
 from .setup_window import setupWindow
 
 class FileWatcherGUI:
-    def __init__(self, root, controller):
-        self.controller = controller
-        self.window = setupWindow(root, controller)
-        self.menubar = MenuBar(root)
+    def __init__(self, theRoot, theController):
+        self.myController = theController
+        self.myWindow = setupWindow(theRoot, theController)
+        self.myMenubar = MenuBar(theRoot)
 
-        root.config(menu=self.menubar.get_menubar())
-        controller.set_view(self)
+        theRoot.config(menu=self.myMenubar.get_menubar())
+        theController.set_view(self)
 
-    def add_log(self, message):
-        self.window.add_log(message)
+    def add_log(self, theMessage):
+        self.myWindow.add_log(theMessage)
+
+    def update_directory_display(self, theDirectory):
+        self.myWindow.update_directory_display(theDirectory)
