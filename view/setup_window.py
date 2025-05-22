@@ -122,14 +122,10 @@ class setupWindow:
             )
 
     def update_directory_view(self, directory):
-        # Clear existing items
         for item in self.directory_tree.get_children():
             self.directory_tree.delete(item)
-            
         try:
-            # 메인 디렉토리와 하위 디렉토리 표시
             for root, dirs, files in os.walk(directory):
-                # 디렉토리 항목 추가
                 for d in dirs:
                     full_path = os.path.join(root, d)
                     modified = datetime.datetime.fromtimestamp(
@@ -143,7 +139,6 @@ class setupWindow:
                         modified
                     ))
                 
-                # 파일 항목 추가
                 for f in files:
                     full_path = os.path.join(root, f)
                     extension = os.path.splitext(f)[1] or "(none)"
