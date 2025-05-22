@@ -18,11 +18,16 @@ class WatcherController:
         if self.watcher:
             print("Already watching.")
             return
-        for file in self.watch_directory:
-            handler = MyEventHandler(logToTextbox=self.view.add_log)
-            self.watcher = FileWatcher(file, handler)
-            self.watcher.start()
-            print(f"Started watching directory: {self.watch_directory}")
+            
+        if not self.watch_directory:
+            print("No directory selected for watching.")
+            return
+            
+        directory = self.watch_directory[0]  # Get the single directory path
+        handler = MyEventHandler(logToTextbox=self.view.add_log)
+        self.watcher = FileWatcher(directory, handler)
+        self.watcher.start()
+        print(f"Started watching directory: {directory}")
     
     def stop_watching(self):
         if self.watcher:
