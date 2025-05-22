@@ -103,7 +103,6 @@ class setupWindow:
                 log_data["timestamp"]
             ))
 
-            # Keep only last 100 items
             if len(self.tree.get_children()) > 100:
                 oldest = self.tree.get_children()[-1]
                 self.tree.delete(oldest)
