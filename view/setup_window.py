@@ -32,6 +32,26 @@ class setupWindow:
         )
         stop_button.pack(padx=10, pady=20)
 
+        # Add directory display label and textbox
+        directory_frame = tk.Frame(root)
+        directory_frame.pack(padx=10, pady=5, fill=tk.X)
+        
+        directory_label = tk.Label(
+            directory_frame,
+            text="Watched Directory:",
+            font=('Arial', 12)
+        )
+        directory_label.pack(side=tk.LEFT, padx=5)
+        
+        self.directory_textbox = tk.Text(
+            directory_frame,
+            height=1,
+            width=50,
+            font=('Arial', 12)
+        )
+        self.directory_textbox.pack(side=tk.LEFT, padx=5, fill=tk.X, expand=True)
+        self.directory_textbox.config(state='disabled')  # Make it read-only
+
         open_directory_button = tk.Button(
             self.root,
             text='Open Directory',
@@ -115,9 +135,15 @@ class setupWindow:
             )
 
     def update_directory_view(self, directory):
+        # Update the directory textbox
+        self.directory_textbox.config(state='normal')
+        self.directory_textbox.delete(1.0, tk.END)
+        self.directory_textbox.insert(1.0, directory)
+        self.directory_textbox.config(state='disabled')
+        
         # Clear existing items
-        for item in self.directory_tree.get_children():
-            self.directory_tree.delete(item)
+        for item in self.tree.get_children():
+            self.tree.delete(item)
             
         try:
             # 메인 디렉토리와 하위 디렉토리 표시
@@ -129,7 +155,7 @@ class setupWindow:
                         os.path.getmtime(full_path)
                     ).strftime('%Y-%m-%d %H:%M:%S')
                     
-                    self.directory_tree.insert('', 'end', values=(
+                    self.tree.insert('', 'end', values=(
                         d,
                         "<DIR>",
                         "-",
@@ -145,7 +171,7 @@ class setupWindow:
                         os.path.getmtime(full_path)
                     ).strftime('%Y-%m-%d %H:%M:%S')
                     
-                    self.directory_tree.insert('', 'end', values=(
+                    self.tree.insert('', 'end', values=(
                         f,
                         extension,
                         size,
