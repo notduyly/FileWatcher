@@ -43,15 +43,16 @@ class setupWindow:
         )
         directory_label.pack(side=tk.LEFT, padx=5)
         
-        self.directory_textbox = tk.Text(
-            directory_frame,
+        self.directory_textbox = tk.Label(
+            self.root,
+            text="No directory selected",
             height=1,
             width=50,
             font=('Arial', 12)
         )
-        self.directory_textbox.pack(side=tk.LEFT, padx=5, fill=tk.X, expand=True)
-        self.directory_textbox.config(state='disabled')  # Make it read-only
-
+        # self.directory_textbox.pack(side=tk.LEFT, padx=5, fill=tk.X, expand=True)
+        # self.directory_textbox.config(state='disabled')  # Make it read-only
+        self.directory_textbox.pack(padx=10, pady=5, fill=tk.X)
         open_directory_button = tk.Button(
             self.root,
             text='Open Directory',
@@ -135,57 +136,7 @@ class setupWindow:
             )
 
     def update_directory_view(self, directory):
-        # Update the directory textbox
-        self.directory_textbox.config(state='normal')
-        self.directory_textbox.delete(1.0, tk.END)
-        self.directory_textbox.insert(1.0, directory)
-        self.directory_textbox.config(state='disabled')
-        
-        # Clear existing items
-        for item in self.tree.get_children():
-            self.tree.delete(item)
-            
-        try:
-            # 메인 디렉토리와 하위 디렉토리 표시
-            for root, dirs, files in os.walk(directory):
-                # 디렉토리 항목 추가
-                for d in dirs:
-                    full_path = os.path.join(root, d)
-                    modified = datetime.datetime.fromtimestamp(
-                        os.path.getmtime(full_path)
-                    ).strftime('%Y-%m-%d %H:%M:%S')
-                    
-                    self.tree.insert('', 'end', values=(
-                        d,
-                        "<DIR>",
-                        "-",
-                        modified
-                    ))
-                
-                # 파일 항목 추가
-                for f in files:
-                    full_path = os.path.join(root, f)
-                    extension = os.path.splitext(f)[1] or "(none)"
-                    size = f"{os.path.getsize(full_path):,} bytes"
-                    modified = datetime.datetime.fromtimestamp(
-                        os.path.getmtime(full_path)
-                    ).strftime('%Y-%m-%d %H:%M:%S')
-                    
-                    self.tree.insert('', 'end', values=(
-                        f,
-                        extension,
-                        size,
-                        modified
-                    ))
-                    
-            # 감시 중인 디렉토리 레이블 업데이트
-            subdir_count = len([x[0] for x in os.walk(directory)][1:])
-            if subdir_count > 0:
-                self.watch_label.config(
-                    text=f"Watching: {directory}\nIncluding {subdir_count} subdirectories"
-                )
-            else:
-                self.watch_label.config(text=f"Watching: {directory}")
-                
-        except Exception as e:
-            print(f"Error updating directory view: {e}")
+        if directory:
+            self.directory_textbox.config(text=f"selected directory: {directory}")
+        else:
+            self.directory_textbox.config(text="No directory selected")

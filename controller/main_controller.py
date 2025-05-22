@@ -49,7 +49,6 @@ class WatcherController:
             # 하위 디렉토리 포함하여 감시 시작
             handler = MyEventHandler(logToTextbox=self.view.add_log)
             self.watcher = FileWatcher(directory, handler)
-            self.watcher.start()
             
             # 하위 디렉토리 정보 출력
             subdirs = [x[0] for x in os.walk(directory)][1:]
