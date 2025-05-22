@@ -74,7 +74,7 @@ class setupWindow:
     def add_log(self, message: str):
         arr = message.split(': ', 1)
         if len(arr) < 2:
-            return  # 예외 처리
+            return
 
         event_type = arr[0]
         file_path = arr[1]
