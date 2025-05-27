@@ -11,42 +11,61 @@ class setupWindow:
         theRoot.title('File System Watcher')
         theRoot.geometry('800x800')
 
-        # Start/Stop and Directory buttons
-        start_button = tk.Button(
-            self.myRoot,
-            text='Start',
-            font=('Arial', 20),
-            command=theController.start_watching
-        )
-        start_button.pack(padx=10, pady=10)
-        stop_button = tk.Button(
-            self.myRoot,
-            text='Stop',
-            font=('Arial', 20),
-            command=self.myController.stop_watching
-        )
-        stop_button.pack(padx=10, pady=20)
 
-        # Directory
+        # Directory frame
+        directory_frame = tk.Frame(self.myRoot)
+        directory_frame.pack(padx=5, pady=5, fill=tk.X)
+        # Directory button
         open_directory_button = tk.Button(
-            self.myRoot,
+            directory_frame,
             text='Open Directory',
-            font=('Arial', 20),
+            font=('Arial', 16),
             command=self.myController.open_directory
         )
-        open_directory_button.pack(padx=10, pady=20)
+        open_directory_button.pack(side=tk.LEFT, padx=5)
         self.directory_label = tk.Label(
-            self.myRoot,
+            directory_frame,
             text='No directory selected',
             padx=5,
             pady=5,
-            width=70,
+            width=60,
             relief=tk.GROOVE,
             borderwidth=2,
             background='white',
         )
-        self.directory_label.pack(padx=10, pady=10)
+        self.directory_label.pack(side=tk.LEFT, padx=5, fill=tk.X, expand=True)
         
+
+        # Control frame
+        control_frame = tk.Frame(self.myRoot) 
+        control_frame.pack(padx=5, pady=5, anchor=tk.W)
+        # Start button
+        start_button = tk.Button(
+            control_frame,
+            text='Start',
+            font=('Arial', 16),
+            command=theController.start_watching
+        )
+        start_button.pack(side=tk.LEFT, padx=5)
+        # Stop button
+        stop_button = tk.Button(
+            control_frame,
+            text='Stop',
+            font=('Arial', 16),
+            command=self.myController.stop_watching
+        )
+        stop_button.pack(side=tk.LEFT)
+        # Dropwdown menu to choose which file extension
+        self.fileExtensionSelection = tk.StringVar(value='None')
+        self.fileExtensionOptions = ['None', '.png', '.txt']
+        self.fileExtensionDropdown = tk.OptionMenu(control_frame, 
+                                            self.fileExtensionSelection, 
+                                            *[opt for opt in self.fileExtensionOptions if opt != self.fileExtensionSelection.get()])
+        
+        self.fileExtensionDropdown.pack(padx=10, pady=10)
+        self.fileExtensionSelection.trace_add('write', self.handle_fileExtension_change)
+
+        # Query Button
         query_button = tk.Button(
             self.myRoot,
             text='Query Database',
@@ -54,16 +73,6 @@ class setupWindow:
             command=self.myController.open_query_window
         )
         query_button.pack(padx=10, pady=20)
-
-        # Dropwdown menu to choose which file extension
-        self.fileExtensionSelection = tk.StringVar(value='None')
-        self.fileExtensionOptions = ['None', '.png', '.txt']
-        self.fileExtensionDropdown = tk.OptionMenu(self.myRoot, 
-                                            self.fileExtensionSelection, 
-                                            *[opt for opt in self.fileExtensionOptions if opt != self.fileExtensionSelection.get()])
-        
-        self.fileExtensionDropdown.pack(padx=10, pady=10)
-        self.fileExtensionSelection.trace_add('write', self.handle_fileExtension_change)
 
         # TextBox to show changes
         cols = ("Filename","Extension","Path","Event","Timestamp")
@@ -77,7 +86,7 @@ class setupWindow:
         self.tree.column("Event", width=100, anchor=tk.W)
         self.tree.column("Timestamp", width=150, anchor=tk.W)
         
-        self.tree.pack(fill=tk.BOTH, expand=True)
+        self.tree.pack(fill=tk.BOTH, expand=True, pady=30)
 
 
     def add_log(self, theMessage: str):
