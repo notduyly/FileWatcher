@@ -34,7 +34,7 @@ class SetupWindow:
             background='white',
         )
         self.directory_label.pack(side=tk.LEFT, padx=5, fill=tk.X, expand=True)
-
+        
 
         # Control frame
         control_frame = tk.Frame(self.myRoot) 
@@ -65,6 +65,14 @@ class SetupWindow:
         self.fileExtensionDropdown.pack(padx=10, pady=10)
         self.fileExtensionSelection.trace_add('write', self._handle_fileExtension_change)
 
+        # Query Button
+        query_button = tk.Button(
+            self.myRoot,
+            text='Query Database',
+            font=('Arial', 20),
+            command=self.myController.open_query_window
+        )
+        query_button.pack(padx=10, pady=20)
 
         # TextBox to show changes
         cols = ("Filename","Extension","Path","Event","Timestamp")

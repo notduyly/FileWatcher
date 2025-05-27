@@ -3,6 +3,7 @@ import os
 
 from model.fileWatcher import FileWatcher
 from model.eventHandler import MyEventHandler
+from view.query_window import QueryWindow
 from tkinter import filedialog
 
 class WatcherController:
@@ -41,3 +42,13 @@ class WatcherController:
         self.myFileExtension = theExtension
         print(f"Selected extension filter: {theExtension}")
         print(self.myWatchDirectory)
+        
+    def open_query_window(self):
+        """Open database query window"""
+        if hasattr(self, 'query_window') and self.query_window is not None:
+            try:
+                self.query_window.focus()
+            except tk.TclError:
+                self.query_window = QueryWindow(self.myView.myRoot, self)
+        else:
+            self.query_window = QueryWindow(self.myView.myRoot, self)
