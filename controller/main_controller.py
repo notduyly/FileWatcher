@@ -49,3 +49,38 @@ class WatcherController:
                 self.query_window = QueryWindow(self.view.root, self)
         else:
             self.query_window = QueryWindow(self.view.root, self)
+
+    def query_events(self, query_type="all", **kwargs):
+        """Query events from database"""
+        from model.database import get_connection
+        
+        try:
+            with get_connection() as conn:
+                cursor = conn.cursor()
+                
+                if query_type == "all":
+                    cursor.execute("""
+                        SELECT 
+                            rowid,
+                            file_path,
+                            file_path,
+                            CASE 
+                                WHEN file_path LIKE '%.%' 
+                                THEN '.' || substr(file_path, instr(file_path, '.', -1) + 1)
+                                ELSE ''
+                            END,
+                            event_type,
+                            timestamp,
+                            '',
+                            is_directory,
+                            ''
+                        FROM file_events
+                        ORDER BY timestamp DESC
+                    """)
+                    
+                results = cursor.fetchall()
+                return results
+                
+        except Exception as e:
+            print(f"Database query error: {e}")
+            return []
