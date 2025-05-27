@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 import csv
 from datetime import datetime, timedelta
+import os
 
 class QueryWindow(tk.Toplevel):
     def __init__(self, master, controller):
@@ -21,45 +22,39 @@ class QueryWindow(tk.Toplevel):
         self.query_type_combo['values'] = ['All Events', 'By Event Type', 'By Extension', 'By Date']
         self.query_type_combo.grid(row=0, column=1, padx=5, pady=5)
         
+        # Event type filter
+        ttk.Label(filter_frame, text="Event Type:").grid(row=1, column=0, padx=5, pady=5)
+        self.event_type_var = tk.StringVar(value="All")
+        self.event_type_combo = ttk.Combobox(filter_frame, textvariable=self.event_type_var)
+        self.event_type_combo['values'] = ['All', 'created', 'modified', 'deleted']
+        self.event_type_combo.grid(row=1, column=1, padx=5, pady=5)
+        
         # Extension filter
-        ttk.Label(filter_frame, text="File Extension:").grid(row=1, column=0, padx=5, pady=5)
+        ttk.Label(filter_frame, text="File Extension:").grid(row=2, column=0, padx=5, pady=5)
         self.ext_var = tk.StringVar(value="All")
         self.ext_combo = ttk.Combobox(filter_frame, textvariable=self.ext_var)
-        self.ext_combo['values'] = ['All', '.txt', '.png', '.jpg']
-        self.ext_combo.grid(row=1, column=1, padx=5, pady=5)
+        self.ext_combo['values'] = ['All', '.txt', '.png', '.jpg', '.py']
+        self.ext_combo.grid(row=2, column=1, padx=5, pady=5)
         
         # Date filter
-        ttk.Label(filter_frame, text="Date Range:").grid(row=2, column=0, padx=5, pady=5)
+        ttk.Label(filter_frame, text="Date Range:").grid(row=3, column=0, padx=5, pady=5)
         self.date_var = tk.StringVar(value="All")
         date_options = ["All", "Today", "Last 7 days", "Last 30 days"]
         self.date_combo = ttk.Combobox(filter_frame, textvariable=self.date_var, values=date_options)
-        self.date_combo.grid(row=2, column=1, padx=5, pady=5)
+        self.date_combo.grid(row=3, column=1, padx=5, pady=5)
         
         # Search button
-        ttk.Button(filter_frame, text="Search", command=self.perform_query).grid(row=3, column=0, columnspan=2, pady=10)
+        ttk.Button(filter_frame, text="Search", command=self.perform_query).grid(row=4, column=0, columnspan=2, pady=10)
         
-        # Results treeview with updated columns
-        columns = ("ID", "Filename", "File Path", "File Extension", 
-                  "Event", "Event Timestamp", "File Size", "Is Directory", "User")
-        self.tree = ttk.Treeview(self, columns=columns, show="headings")
+        # Results treeview - setup_window.py와 동일한 컬럼 구조 사용
+        cols = ("Filename", "Extension", "Path", "Event", "Timestamp")
+        self.tree = ttk.Treeview(self, columns=cols, show='headings')
         
-        # Configure column headings and widths
-        column_widths = {
-            "ID": 20,
-            "Filename": 100,
-            "File Path": 200,
-            "File Extension": 30,
-            "Event": 50,
-            "Event Timestamp": 150,
-            "File Size": 50,
-            "Is Directory": 50,
-            "User": 80
-        }
-        
-        for col, width in column_widths.items():
+        # Configure columns like setup_window.py
+        for col in cols:
             self.tree.heading(col, text=col)
-            self.tree.column(col, width=width)
-
+            self.tree.column(col, width=120, anchor=tk.W)
+        
         # Scrollbar
         scrollbar = ttk.Scrollbar(self, orient="vertical", command=self.tree.yview)
         self.tree.configure(yscrollcommand=scrollbar.set)
@@ -96,48 +91,50 @@ class QueryWindow(tk.Toplevel):
         self.perform_query()
     
     def perform_query(self):
+        print("Starting query...")
+        
         # Clear existing items
         for item in self.tree.get_children():
             self.tree.delete(item)
         
-        # Get query type
+        # Get selected filter values
         query_type = self.query_type_var.get()
+        event_type = self.event_type_var.get()
+        extension = self.ext_var.get()
+        date_range = self.date_var.get()
         
-        # Convert query type to parameter
+        print(f"Filters - Query: {query_type}, Event: {event_type}, Ext: {extension}, Date: {date_range}")
+        
+        # Build query parameters
+        kwargs = {}
         if query_type == "By Event Type":
-            results = self.controller.query_events(query_type="event_type")
-            # Display event type statistics
-            for event_type, count in results:
-                self.tree.insert("", "end", values=("", "", "", "", 
-                               event_type, "", "", "", f"Count: {count}"))
-                
+            kwargs['event_type'] = event_type
         elif query_type == "By Extension":
-            results = self.controller.query_events(query_type="extension")
-            # Display extension statistics
-            for extension, count in results:
-                self.tree.insert("", "end", values=("", "", "", 
-                               extension, "", "", "", "", f"Count: {count}"))
-                
+            kwargs['extension'] = extension
         elif query_type == "By Date":
-            date_range = self.date_var.get()
-            start_date = None
-            if date_range == "Today":
-                start_date = datetime.now().strftime("%Y-%m-%d")
-            elif date_range == "Last 7 days":
-                start_date = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")
-            elif date_range == "Last 30 days":
-                start_date = (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d")
-                
-            results = self.controller.query_events(query_type="date", start_date=start_date)
-            # Display full event details
-            for event in results:
-                self.tree.insert("", "end", values=event)
+            kwargs['date_range'] = date_range
+    
+        # Execute query with filters
+        results = self.controller.query_events(query_type=query_type, **kwargs)
+        print(f"Query returned {len(results) if results else 0} results")
         
-        else:  # All Events
-            results = self.controller.query_events()
-            # Display full event details
+        if results:
             for event in results:
-                self.tree.insert("", "end", values=event)
+                try:
+                    filename = os.path.basename(event[1])
+                    extension = os.path.splitext(filename)[1] or "(none)"
+                    
+                    self.tree.insert('', 0, values=(
+                        filename,
+                        extension,
+                        event[2],  # file_path
+                        event[4],  # event_type
+                        event[5]   # timestamp
+                    ))
+                except Exception as e:
+                    print(f"Error processing event: {e}")
+        else:
+            print("No results found")
         
         self.db_results = results
 

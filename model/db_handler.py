@@ -68,28 +68,64 @@ def fetch_all_events():
         cursor.execute('SELECT * FROM events')
         return cursor.fetchall()
 
-def fetch_event_by_type():
+def fetch_event_by_type(event_type='All'):
+    """Fetch events filtered by event type"""
     with get_connection() as conn:
         if conn is None:
             return []
         cursor = conn.cursor()
-        cursor.execute('SELECT event, COUNT(*) FROM events GROUP BY event')
+        
+        if event_type == 'All':
+            cursor.execute('''
+                SELECT * FROM events 
+                ORDER BY event_timestamp DESC
+            ''')
+        else:
+            cursor.execute('''
+                SELECT * FROM events 
+                WHERE event = ? 
+                ORDER BY event_timestamp DESC
+            ''', (event_type,))
+            
         return cursor.fetchall()
 
-def fetch_event_by_extension():
+def fetch_event_by_extension(extension='All'):
+    """Fetch events filtered by file extension"""
     with get_connection() as conn:
         if conn is None:
             return []
         cursor = conn.cursor()
-        cursor.execute('SELECT file_extension, COUNT(*) FROM events GROUP BY file_extension')
+        
+        if extension == 'All':
+            cursor.execute('''
+                SELECT * FROM events 
+                ORDER BY event_timestamp DESC
+            ''')
+        else:
+            cursor.execute('''
+                SELECT * FROM events 
+                WHERE file_extension = ? 
+                ORDER BY event_timestamp DESC
+            ''', (extension,))
+            
         return cursor.fetchall()
 
-def fetch_event_by_after_date(theDate: str):
+def fetch_event_by_after_date(date_range='All'):
+    """Fetch events filtered by date range"""
     with get_connection() as conn:
         if conn is None:
             return []
         cursor = conn.cursor()
-        cursor.execute('SELECT * FROM events WHERE event_timestamp > ?', (theDate,))
+        
+        if date_range == 'All':
+            cursor.execute('SELECT * FROM events ORDER BY event_timestamp DESC')
+        elif date_range == 'Today':
+            cursor.execute('SELECT * FROM events WHERE DATE(event_timestamp) = DATE("now") ORDER BY event_timestamp DESC')
+        elif date_range == 'Last 7 days':
+            cursor.execute('SELECT * FROM events WHERE event_timestamp >= datetime("now", "-7 days") ORDER BY event_timestamp DESC')
+        elif date_range == 'Last 30 days':
+            cursor.execute('SELECT * FROM events WHERE event_timestamp >= datetime("now", "-30 days") ORDER BY event_timestamp DESC')
+        
         return cursor.fetchall()
 
 def export_to_csv(theFilename: str):

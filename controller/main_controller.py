@@ -52,3 +52,47 @@ class WatcherController:
                 self.query_window = QueryWindow(self.myView.myRoot, self)
         else:
             self.query_window = QueryWindow(self.myView.myRoot, self)
+
+    def query_events(self, query_type="all", **kwargs):
+        """Query events from database through db_handler"""
+        from model.db_handler import fetch_all_events, fetch_event_by_extension, fetch_event_by_after_date, fetch_event_by_type;
+        
+        try:
+            if query_type == "By Extension":
+                extension = kwargs.get('extension', 'All')
+                return fetch_event_by_extension(extension)
+            
+            elif query_type == "By Event Type":
+                event_type = kwargs.get('event_type', 'All')
+                return fetch_event_by_type(event_type)
+                
+            elif query_type == "By Date":
+                date_range = kwargs.get('date_range', 'All')
+                return fetch_event_by_after_date(date_range)
+                
+            else:
+                return fetch_all_events()
+                
+        except Exception as e:
+            print(f"Error querying events: {e}")
+            return []
+
+    def reset_database(self):
+        """Reset database through db_handler"""
+        from model.db_handler import reset_database
+        
+        try:
+            return reset_database()
+        except Exception as e:
+            print(f"Error resetting database: {e}")
+            return False
+
+    def export_to_csv(self, file_path, results):
+        """Export results to CSV through db_handler"""
+        from model.db_handler import export_to_csv
+        
+        try:
+            return export_to_csv(file_path, results)
+        except Exception as e:
+            print(f"Error exporting to CSV: {e}")
+            return False
