@@ -15,36 +15,32 @@ class QueryWindow(tk.Toplevel):
         filter_frame = ttk.LabelFrame(self, text="Query Filters")
         filter_frame.pack(fill="x", padx=5, pady=5)
         
-        # Query type filter
-        ttk.Label(filter_frame, text="Query Type:").grid(row=0, column=0, padx=5, pady=5)
-        self.query_type_var = tk.StringVar(value="all")
-        self.query_type_combo = ttk.Combobox(filter_frame, textvariable=self.query_type_var)
-        self.query_type_combo['values'] = ['All Events', 'By Event Type', 'By Extension', 'By Date']
-        self.query_type_combo.grid(row=0, column=1, padx=5, pady=5)
-        
         # Event type filter
-        ttk.Label(filter_frame, text="Event Type:").grid(row=1, column=0, padx=5, pady=5)
+        ttk.Label(filter_frame, text="Event Type:").grid(row=0, column=0, padx=5, pady=5)
         self.event_type_var = tk.StringVar(value="All")
         self.event_type_combo = ttk.Combobox(filter_frame, textvariable=self.event_type_var)
         self.event_type_combo['values'] = ['All', 'created', 'modified', 'deleted']
-        self.event_type_combo.grid(row=1, column=1, padx=5, pady=5)
+        self.event_type_combo.grid(row=0, column=1, padx=5, pady=5)
+        self.event_type_combo.bind('<<ComboboxSelected>>', lambda e: self.perform_query())
         
         # Extension filter
-        ttk.Label(filter_frame, text="File Extension:").grid(row=2, column=0, padx=5, pady=5)
+        ttk.Label(filter_frame, text="File Extension:").grid(row=1, column=0, padx=5, pady=5)
         self.ext_var = tk.StringVar(value="All")
         self.ext_combo = ttk.Combobox(filter_frame, textvariable=self.ext_var)
         self.ext_combo['values'] = ['All', '.txt', '.png', '.jpg', '.py']
-        self.ext_combo.grid(row=2, column=1, padx=5, pady=5)
+        self.ext_combo.grid(row=1, column=1, padx=5, pady=5)
+        self.ext_combo.bind('<<ComboboxSelected>>', lambda e: self.perform_query())
         
         # Date filter
-        ttk.Label(filter_frame, text="Date Range:").grid(row=3, column=0, padx=5, pady=5)
+        ttk.Label(filter_frame, text="Date Range:").grid(row=2, column=0, padx=5, pady=5)
         self.date_var = tk.StringVar(value="All")
         date_options = ["All", "Today", "Last 7 days", "Last 30 days"]
         self.date_combo = ttk.Combobox(filter_frame, textvariable=self.date_var, values=date_options)
-        self.date_combo.grid(row=3, column=1, padx=5, pady=5)
-        
+        self.date_combo.grid(row=2, column=1, padx=5, pady=5)
+        self.date_combo.bind('<<ComboboxSelected>>', lambda e: self.perform_query())
+
         # Search button
-        ttk.Button(filter_frame, text="Search", command=self.perform_query).grid(row=4, column=0, columnspan=2, pady=10)
+        ttk.Button(filter_frame, text="Search", command=self.perform_query).grid(row=3, column=0, columnspan=2, pady=10)
         
         # Results treeview - setup_window.py와 동일한 컬럼 구조 사용
         cols = ("Filename", "Extension", "Path", "Event", "Timestamp")
@@ -97,25 +93,16 @@ class QueryWindow(tk.Toplevel):
         for item in self.tree.get_children():
             self.tree.delete(item)
         
-        # Get selected filter values
-        query_type = self.query_type_var.get()
-        event_type = self.event_type_var.get()
-        extension = self.ext_var.get()
-        date_range = self.date_var.get()
+        # Get all filter values
+        filters = {
+            'event_type': self.event_type_var.get(),
+            'extension': self.ext_var.get(),
+            'date_range': self.date_var.get()
+        }
+        print(f"Applied filters: {filters}")
         
-        print(f"Filters - Query: {query_type}, Event: {event_type}, Ext: {extension}, Date: {date_range}")
-        
-        # Build query parameters
-        kwargs = {}
-        if query_type == "By Event Type":
-            kwargs['event_type'] = event_type
-        elif query_type == "By Extension":
-            kwargs['extension'] = extension
-        elif query_type == "By Date":
-            kwargs['date_range'] = date_range
-    
-        # Execute query with filters
-        results = self.controller.query_events(query_type=query_type, **kwargs)
+        # Execute query with combined filters
+        results = self.controller.query_events(filters=filters)
         print(f"Query returned {len(results) if results else 0} results")
         
         if results:

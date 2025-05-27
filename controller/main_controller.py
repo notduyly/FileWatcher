@@ -53,28 +53,42 @@ class WatcherController:
         else:
             self.query_window = QueryWindow(self.myView.myRoot, self)
 
-    def query_events(self, query_type="all", **kwargs):
-        """Query events from database through db_handler"""
-        from model.db_handler import fetch_all_events, fetch_event_by_extension, fetch_event_by_after_date, fetch_event_by_type;
+    def query_events(self, filters=None):
+        """Query events from database with combined filters"""
+        from model.db_handler import get_connection
         
         try:
-            if query_type == "By Extension":
-                extension = kwargs.get('extension', 'All')
-                return fetch_event_by_extension(extension)
-            
-            elif query_type == "By Event Type":
-                event_type = kwargs.get('event_type', 'All')
-                return fetch_event_by_type(event_type)
+            with get_connection() as conn:
+                cursor = conn.cursor()
                 
-            elif query_type == "By Date":
-                date_range = kwargs.get('date_range', 'All')
-                return fetch_event_by_after_date(date_range)
+                query = "SELECT * FROM events WHERE 1=1"
+                params = []
                 
-            else:
-                return fetch_all_events()
+                if filters:
+                    if filters['event_type'] != 'All':
+                        query += " AND event = ?"
+                        params.append(filters['event_type'])
+                    
+                    if filters['extension'] != 'All':
+                        query += " AND file_extension = ?"
+                        params.append(filters['extension'])
+                    
+                    if filters['date_range'] != 'All':
+                        if filters['date_range'] == 'Today':
+                            query += " AND DATE(event_timestamp) = DATE('now')"
+                        elif filters['date_range'] == 'Last 7 days':
+                            query += " AND event_timestamp >= datetime('now', '-7 days')"
+                        elif filters['date_range'] == 'Last 30 days':
+                            query += " AND event_timestamp >= datetime('now', '-30 days')"
+                
+                query += " ORDER BY event_timestamp DESC"
+                print(f"Executing query: {query} with params: {params}")
+                
+                cursor.execute(query, params)
+                return cursor.fetchall()
                 
         except Exception as e:
-            print(f"Error querying events: {e}")
+            print(f"Database error: {e}")
             return []
 
     def reset_database(self):
