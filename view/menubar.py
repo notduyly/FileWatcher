@@ -6,11 +6,11 @@ class MenuBar:
     def __init__(self, theRoot):
         self.myRoot = theRoot
         self.myMenubar = Menu(self.myRoot)
-        self.create()
+        self._create()
 
 
 # System menu bar
-    def create(self):
+    def _create(self):
         # File menu
         file_menu = Menu(self.myMenubar, tearoff=0)
         file_menu.add_command(label="Open")

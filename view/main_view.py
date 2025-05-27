@@ -1,10 +1,10 @@
 from view.menubar import MenuBar
-from .setup_window import setupWindow
+from .setup_window import SetupWindow
 
 class FileWatcherGUI:
     def __init__(self, theRoot, theController):
         self.myController = theController
-        self.myWindow = setupWindow(theRoot, theController)
+        self.myWindow = SetupWindow(theRoot, theController)
         self.myMenubar = MenuBar(theRoot)
 
         theRoot.config(menu=self.myMenubar.get_menubar())

@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 import os
 import datetime
-class setupWindow:
+class SetupWindow:
     def __init__(self, theRoot, theController):
         self.myRoot = theRoot
         self.myController = theController
@@ -63,7 +63,7 @@ class setupWindow:
                                             *[opt for opt in self.fileExtensionOptions if opt != self.fileExtensionSelection.get()])
         
         self.fileExtensionDropdown.pack(padx=10, pady=10)
-        self.fileExtensionSelection.trace_add('write', self.handle_fileExtension_change)
+        self.fileExtensionSelection.trace_add('write', self._handle_fileExtension_change)
 
 
         # TextBox to show changes
@@ -100,7 +100,7 @@ class setupWindow:
             oldest = self.tree.get_children()[-1]
             self.tree.delete(oldest)
     
-    def handle_fileExtension_change(self, *args):
+    def _handle_fileExtension_change(self, *args):
         curr_selection = self.fileExtensionSelection.get()
 
         self.myController.set_file_extension(curr_selection)
