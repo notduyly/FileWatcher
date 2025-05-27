@@ -3,84 +3,52 @@ import os
 
 from model.fileWatcher import FileWatcher
 from model.eventHandler import MyEventHandler
-from tkinter import filedialog, messagebox
-import tkinter as tk
+from view.query_window import QueryWindow
+from tkinter import filedialog
 
 class WatcherController:
     def __init__(self):
-        self.watcher = None
-        self.view = None
-        self.watch_directory = ''
+        self.myWatcher = None
+        self.myView = None
+        self.myWatchDirectory = ''
+        self.myFileExtension = ''
 
     def set_view(self, view):
-        self.view = view
+        self.myView = view
 
     def start_watching(self):
-        if self.watcher:
-            print("Already watching.")
-            return
-            
-        handler = MyEventHandler(logToTextbox=self.view.add_log)
-        self.watcher = FileWatcher(self.watch_directory[0], handler)
-        self.watcher.start()
-        print(f"Started watching directory: {self.watch_directory[0]}")
+        handler = MyEventHandler(logToTextbox=self.myView.add_log)
+
+        if self.myFileExtension and self.myFileExtension != 'None':
+            handler.set_extension_filter(self.myFileExtension)
+
+        self.myWatcher = FileWatcher(self.myWatchDirectory, handler)
+        self.myWatcher.start()
+        print(f"Started watching directory: {self.myWatchDirectory}")
     
     def stop_watching(self):
-        if self.watcher:
-            self.watcher.stop()
-            self.watcher = None
+        if self.myWatcher:
+            self.myWatcher.stop()
             print("Stopped watching")
 
     def open_directory(self):
         directory = filedialog.askdirectory()
         if directory:
-            if self.watcher:
-                self.stop_watching()
-                
-            self.watch_directory = [directory]
-
+            self.myWatchDirectory = directory
+            self.myView.update_directory_display(directory)
+            print(f"Selected directory: {directory}")
+    
+    def set_file_extension(self, theExtension):
+        self.myFileExtension = theExtension
+        print(f"Selected extension filter: {theExtension}")
+        print(self.myWatchDirectory)
+        
     def open_query_window(self):
         """Open database query window"""
-        from view.query_window import QueryWindow
         if hasattr(self, 'query_window') and self.query_window is not None:
             try:
                 self.query_window.focus()
             except tk.TclError:
-                self.query_window = QueryWindow(self.view.root, self)
+                self.query_window = QueryWindow(self.myView.myRoot, self)
         else:
-            self.query_window = QueryWindow(self.view.root, self)
-
-    def query_events(self, query_type="all", **kwargs):
-        """Query events from database"""
-        from model.database import get_connection
-        
-        try:
-            with get_connection() as conn:
-                cursor = conn.cursor()
-                
-                if query_type == "all":
-                    cursor.execute("""
-                        SELECT 
-                            rowid,
-                            file_path,
-                            file_path,
-                            CASE 
-                                WHEN file_path LIKE '%.%' 
-                                THEN '.' || substr(file_path, instr(file_path, '.', -1) + 1)
-                                ELSE ''
-                            END,
-                            event_type,
-                            timestamp,
-                            '',
-                            is_directory,
-                            ''
-                        FROM file_events
-                        ORDER BY timestamp DESC
-                    """)
-                    
-                results = cursor.fetchall()
-                return results
-                
-        except Exception as e:
-            print(f"Database query error: {e}")
-            return []
+            self.query_window = QueryWindow(self.myView.myRoot, self)
