@@ -11,7 +11,8 @@ class setupWindow:
         theRoot.title('File System Watcher')
         theRoot.geometry('800x800')
 
-        # Directory
+
+        # Directory frame
         directory_frame = tk.Frame(self.myRoot)
         directory_frame.pack(padx=5, pady=5, fill=tk.X)
         # Directory button
