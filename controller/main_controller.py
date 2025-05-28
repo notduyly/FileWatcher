@@ -13,8 +13,8 @@ class WatcherController:
         self.__myWatchDirectory = ''
         self.__myFileExtension = ''
 
-    def set_view(self, view):
-        self.__myView = view
+    def set_view(self, theView):
+        self.__myView = theView
 
     def start_watching(self):
         handler = MyEventHandler(logToTextbox=self.__myView.add_log)
@@ -45,10 +45,10 @@ class WatcherController:
         
     def open_query_window(self):
         """Open database query window"""
-        if hasattr(self, 'query_window') and self.query_window is not None:
+        if hasattr(self, 'query_window') and self.__query_window is not None:
             try:
-                self.query_window.focus()
+                self.__query_window.focus()
             except tk.TclError:
-                self.query_window = QueryWindow(self.__myView.myRoot, self)
+                self.__query_window = QueryWindow(self.__myView.get_root(), self)
         else:
-            self.query_window = QueryWindow(self.__myView.myRoot, self)
+            self.__query_window = QueryWindow(self.__myView.get_root(), self)

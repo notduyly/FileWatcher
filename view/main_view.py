@@ -16,3 +16,6 @@ class FileWatcherGUI:
 
     def update_directory_display(self, theDirectory):
         self.__myWindow.update_directory_display(theDirectory)
+    
+    def get_root(self):
+        return self.__myRoot
