@@ -4,41 +4,41 @@ from tkinter import Menu
 class MenuBar:
     
     def __init__(self, theRoot):
-        self.myRoot = theRoot
-        self.myMenubar = Menu(self.myRoot)
+        self.__myRoot = theRoot
+        self.__myMenubar = Menu(self.__myRoot)
         self._create()
 
 
 # System menu bar
     def _create(self):
         # File menu
-        file_menu = Menu(self.myMenubar, tearoff=0)
+        file_menu = Menu(self.__myMenubar, tearoff=0)
         file_menu.add_command(label="Open")
         file_menu.add_command(label="Save")
         file_menu.add_separator()
         file_menu.add_command(label="Exit", command=self.exit_app)
-        self.myMenubar.add_cascade(label="File", menu=file_menu)
+        self.__myMenubar.add_cascade(label="File", menu=file_menu)
 
         # File System Watcher menu
-        fsw_menu = Menu(self.myMenubar, tearoff=0)
+        fsw_menu = Menu(self.__myMenubar, tearoff=0)
         fsw_menu.add_command(label="Start watching")
         fsw_menu.add_command(label="Stop watching")
-        self.myMenubar.add_cascade(label="File System Watcher", menu=fsw_menu)
+        self.__myMenubar.add_cascade(label="File System Watcher", menu=fsw_menu)
 
         # Database menu
-        db_menu = Menu(self.myMenubar, tearoff=0)
+        db_menu = Menu(self.__myMenubar, tearoff=0)
         db_menu.add_command(label="Save to database")
-        self.myMenubar.add_cascade(label="Database", menu=db_menu)
+        self.__myMenubar.add_cascade(label="Database", menu=db_menu)
 
         # About menu
-        ab_menu = Menu(self.myMenubar, tearoff=0)
+        ab_menu = Menu(self.__myMenubar, tearoff=0)
         ab_menu.add_command(label="Developers")
         ab_menu.add_command(label="Version")
         ab_menu.add_command(label="How to use")
-        self.myMenubar.add_cascade(label="About", menu=ab_menu)
+        self.__myMenubar.add_cascade(label="About", menu=ab_menu)
 
     def get_menubar(self):
-        return self.myMenubar
+        return self.__myMenubar
 
     def exit_app(self):
         import sys

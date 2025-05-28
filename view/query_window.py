@@ -40,7 +40,7 @@ class QueryWindow(tk.Toplevel):
         
         # Results treeview with updated columns
         columns = ("ID", "Filename", "File Path", "File Extension", 
-                  "Event", "Event Timestamp", "File Size", "Is Directory", "User")
+                "Event", "Event Timestamp", "File Size", "Is Directory", "User")
         self.tree = ttk.Treeview(self, columns=columns, show="headings")
         
         # Configure column headings and widths
@@ -73,24 +73,24 @@ class QueryWindow(tk.Toplevel):
         
         # Add Reset DB button
         ttk.Button(bottom_frame, text="Reset Database", 
-                  command=self.reset_database,
-                  style='Danger.TButton').pack(side="right", padx=20)  # 오른쪽에 배치
+                command=self.reset_database,
+                style='Danger.TButton').pack(side="right", padx=20)  # 오른쪽에 배치
         
         # Create danger style for reset button
         danger_style = ttk.Style()
         danger_style.configure('Danger.TButton', 
-                             foreground='red',
-                             font=('Arial', 10, 'bold'))
+                            foreground='red',
+                            font=('Arial', 10, 'bold'))
         
         ttk.Button(bottom_frame, text="Export to CSV", 
-                  command=self.export_to_csv).pack(side="left", padx=5)
+                command=self.export_to_csv).pack(side="left", padx=5)
         
         ttk.Label(bottom_frame, text="Email:").pack(side="left", padx=5)
         self.email_entry = ttk.Entry(bottom_frame, width=30)
         self.email_entry.pack(side="left", padx=5)
         
         ttk.Button(bottom_frame, text="Send Email", 
-                  command=self.send_email).pack(side="left", padx=5)
+                command=self.send_email).pack(side="left", padx=5)
         
         # Initial query
         self.perform_query()
@@ -109,14 +109,14 @@ class QueryWindow(tk.Toplevel):
             # Display event type statistics
             for event_type, count in results:
                 self.tree.insert("", "end", values=("", "", "", "", 
-                               event_type, "", "", "", f"Count: {count}"))
+                            event_type, "", "", "", f"Count: {count}"))
                 
         elif query_type == "By Extension":
             results = self.controller.query_events(query_type="extension")
             # Display extension statistics
             for extension, count in results:
                 self.tree.insert("", "end", values=("", "", "", 
-                               extension, "", "", "", "", f"Count: {count}"))
+                            extension, "", "", "", "", f"Count: {count}"))
                 
         elif query_type == "By Date":
             date_range = self.date_var.get()
@@ -173,8 +173,8 @@ class QueryWindow(tk.Toplevel):
     def reset_database(self):
         """Reset the database after confirmation"""
         if messagebox.askyesno("Confirm Reset", 
-                             "Are you sure you want to reset the database?\n"
-                             "This action cannot be undone!"):
+                            "Are you sure you want to reset the database?\n"
+                            "This action cannot be undone!"):
             if self.controller.reset_database():
                 messagebox.showinfo("Success", "Database has been reset successfully")
                 self.perform_query()  # Refresh the view
