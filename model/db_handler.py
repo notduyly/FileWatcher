@@ -39,16 +39,15 @@ def delete_event(theEventId: int):
             conn.execute('DELETE FROM events WHERE id = ?', (theEventId,))
 
 def reset_database():
-    """Reset the database by dropping and recreating the table"""
+    """Reset the events table"""
     with get_connection() as conn:
         if conn is None:
             return False
         try:
             cursor = conn.cursor()
-            # Drop existing table
             cursor.execute('DROP TABLE IF EXISTS events')
-            # Recreate table
-            initialize_database()
+            from .database import init_db
+            init_db()
             return True
         except Exception as e:
             print(f"Error resetting database: {e}")

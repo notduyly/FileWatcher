@@ -1,7 +1,14 @@
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
-import csv
 from datetime import datetime, timedelta
+from model.db_handler import (
+    fetch_all_events, 
+    fetch_event_by_type,
+    fetch_event_by_extension,
+    fetch_event_by_after_date,
+    export_to_csv,
+    reset_database
+)
 
 class QueryWindow(tk.Toplevel):
     def __init__(self, master, theController):
@@ -100,42 +107,18 @@ class QueryWindow(tk.Toplevel):
         for item in self.__tree.get_children():
             self.__tree.delete(item)
         
-        # Get query type
         query_type = self.__query_type_var.get()
         
-        # Convert query type to parameter
         if query_type == "By Event Type":
-            results = self.__myController.query_events(query_type="event_type")
-            # Display event type statistics
-            for event_type, count in results:
-                self.__tree.insert("", "end", values=("", "", "", "", 
-                            event_type, "", "", "", f"Count: {count}"))
-                
+            results = fetch_event_by_type(self.__event_type_var.get())
         elif query_type == "By Extension":
-            results = self.__myController.query_events(query_type="extension")
-            # Display extension statistics
-            for extension, count in results:
-                self.__tree.insert("", "end", values=("", "", "", 
-                            extension, "", "", "", "", f"Count: {count}"))
-                
+            results = fetch_event_by_extension(self.__ext_var.get())
         elif query_type == "By Date":
-            date_range = self.__date_var.get()
-            start_date = None
-            if date_range == "Today":
-                start_date = datetime.now().strftime("%Y-%m-%d")
-            elif date_range == "Last 7 days":
-                start_date = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")
-            elif date_range == "Last 30 days":
-                start_date = (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d")
-                
-            results = self.__myController.query_events(query_type="date", start_date=start_date)
-            # Display full event details
-            for event in results:
-                self.__tree.insert("", "end", values=event)
-        
+            results = fetch_event_by_after_date(self.__date_var.get())
         else:  # All Events
-            results = self.__myController.query_events()
-            # Display full event details
+            results = fetch_all_events()
+
+        if results:
             for event in results:
                 self.__tree.insert("", "end", values=event)
         
@@ -149,7 +132,7 @@ class QueryWindow(tk.Toplevel):
         if not file_path:
             return
 
-        if self.__myController.export_to_csv(file_path, self.__db_results):
+        if export_to_csv(file_path, self.__db_results):
             messagebox.showinfo("Success", f"CSV exported to {file_path}")
             self.__last_exported_file = file_path
         else:
@@ -175,7 +158,7 @@ class QueryWindow(tk.Toplevel):
         if messagebox.askyesno("Confirm Reset", 
                             "Are you sure you want to reset the database?\n"
                             "This action cannot be undone!"):
-            if self.__myController.reset_database():
+            if reset_database():
                 messagebox.showinfo("Success", "Database has been reset successfully")
                 self.perform_query()  # Refresh the view
             else:
