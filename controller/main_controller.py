@@ -1,10 +1,11 @@
 import sys
 import os
+import tkinter as tk
+from tkinter import filedialog
 
 from model.fileWatcher import FileWatcher
 from model.eventHandler import MyEventHandler
 from view.query_window import QueryWindow
-from tkinter import filedialog
 
 class WatcherController:
     def __init__(self):
@@ -49,9 +50,13 @@ class WatcherController:
             try:
                 self.query_window.focus()
             except tk.TclError:
+                # 기존 윈도우가 닫혔으면 새로 생성
                 self.query_window = QueryWindow(self.myView.myRoot, self)
+                self.query_window.grab_set()  # 모달 윈도우로 설정
         else:
+            # 처음 열 때
             self.query_window = QueryWindow(self.myView.myRoot, self)
+            self.query_window.grab_set()  # 모달 윈도우로 설정
 
     def query_events(self, filters=None):
         """Query events from database with combined filters"""
@@ -94,9 +99,13 @@ class WatcherController:
     def reset_database(self):
         """Reset database through db_handler"""
         from model.db_handler import reset_database
-        
         try:
-            return reset_database()
+            success = reset_database()
+            if success:
+                print("Database reset successfully")
+            else:
+                print("Failed to reset database")
+            return success
         except Exception as e:
             print(f"Error resetting database: {e}")
             return False

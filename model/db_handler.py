@@ -38,12 +38,21 @@ def delete_event(theEventId: int):
         with conn:
             conn.execute('DELETE FROM events WHERE id = ?', (theEventId,))
 
-def reset_db():
+def reset_database():
+    """Reset the database by dropping and recreating the table"""
     with get_connection() as conn:
         if conn is None:
-            return
-        with conn:
-            conn.execute('DROP TABLE IF EXISTS events')
+            return False
+        try:
+            cursor = conn.cursor()
+            # Drop existing table
+            cursor.execute('DROP TABLE IF EXISTS events')
+            # Recreate table
+            initialize_database()
+            return True
+        except Exception as e:
+            print(f"Error resetting database: {e}")
+            return False
 
 def fetch_all_events():
     with get_connection() as conn:
