@@ -93,9 +93,19 @@ class QueryWindow(tk.Toplevel):
         self.__perform_query()
     
     def __perform_query(self):
+        """Perform database query with current filters and refresh extension list"""
         # Clear existing items
         for item in self.__myTree.get_children():
             self.__myTree.delete(item)
+        
+        # Update extension list
+        current_ext = self.__myExtVar.get()
+        extensions = self.__myController.get_available_extensions()
+        self.__myExtCombo['values'] = extensions
+        if current_ext in extensions:
+            self.__myExtVar.set(current_ext)
+        else:
+            self.__myExtVar.set('All')
         
         # Get filter values
         filters = {
