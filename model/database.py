@@ -12,14 +12,16 @@ def init_db():
         if conn is None:
             return
         with conn:
-            # Create file_events table
             conn.execute('''
-                CREATE TABLE IF NOT EXISTS file_events (
+                CREATE TABLE IF NOT EXISTS events (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    event_type TEXT NOT NULL,
+                    filename TEXT NOT NULL,
                     file_path TEXT NOT NULL,
-                    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-                    is_directory BOOLEAN DEFAULT 0
+                    file_extension TEXT NOT NULL,
+                    event TEXT NOT NULL,
+                    event_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    file_size INTEGER,
+                    user TEXT
                 )
             ''')
 

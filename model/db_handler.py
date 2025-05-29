@@ -3,32 +3,17 @@ import csv
 import os
 from datetime import datetime
 import getpass
-from .database import get_connection
+from .database import get_connection, init_db as initialize_database
 
-def init_event_table():
-    with get_connection() as conn:
-        if conn is None:
-            return
-        with conn:
-            conn.execute('''
-                CREATE TABLE IF NOT EXISTS events (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    filename TEXT NOT NULL,
-                    file_path TEXT NOT NULL,
-                    file_extension TEXT NOT NULL,
-                    event TEXT NOT NULL,
-                    event_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-                    file_size INTEGER,
-                    is_directory BOOLEAN,
-                    user TEXT
-                )
-            ''')
+def init_db():
+    """Initialize database by calling database.py's init_db function"""
+    return initialize_database()
 
-def insert_event(event_type, file_path, is_directory=False):
+def insert_event(event_type, file_path):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     file_name = os.path.basename(file_path)
     file_extension = os.path.splitext(file_name)[1]
-    file_size = os.path.getsize(file_path) if not is_directory and os.path.isfile(file_path) else None
+    file_size = os.path.getsize(file_path) if os.path.isfile(file_path) else None
     user = getpass.getuser()
 
     with get_connection() as conn:
@@ -38,12 +23,12 @@ def insert_event(event_type, file_path, is_directory=False):
             conn.execute("""
                 INSERT INTO events (
                     filename, file_path, file_extension, event,
-                    event_timestamp, file_size, is_directory, user
+                    event_timestamp, file_size, user
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
             """, (
                 file_name, file_path, file_extension, event_type,
-                timestamp, file_size, is_directory, user
+                timestamp, file_size, user
             ))
 
 def delete_event(theEventId: int):
@@ -129,11 +114,7 @@ def fetch_event_by_after_date(date_range='All'):
         return cursor.fetchall()
 
 def export_to_csv(theFilename: str, events=None):
-    """Export events to CSV file
-    Args:
-        theFilename (str): Path to save CSV file
-        events (list, optional): List of events to export. If None, fetch all events.
-    """
+    """Export events to CSV file"""
     if events is None:
         events = fetch_all_events()
         
@@ -141,7 +122,7 @@ def export_to_csv(theFilename: str, events=None):
         writer = csv.writer(file)
         writer.writerow([
             'ID', 'Filename', 'File Path', 'File Extension',
-            'Event', 'Event Timestamp', 'File Size', 'Is Directory', 'User'
+            'Event', 'Event Timestamp', 'File Size', 'User'
         ])
         writer.writerows(events)
     print(f"Data exported to {theFilename} successfully.")
