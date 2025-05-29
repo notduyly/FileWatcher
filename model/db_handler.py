@@ -152,3 +152,40 @@ def get_event_by_id(theEventId: int):
         cursor = conn.cursor()
         cursor.execute('SELECT * FROM events WHERE id = ?', (theEventId,))
         return cursor.fetchone()
+
+def query_events(filters=None):
+    """Query events from database with combined filters"""
+    with get_connection() as conn:
+        if conn is None:
+            return []
+        try:
+            cursor = conn.cursor()
+            query = "SELECT * FROM events WHERE 1=1"
+            params = []
+            
+            if filters:
+                if filters['event_type'] != 'All':
+                    query += " AND event = ?"
+                    params.append(filters['event_type'])
+                
+                if filters['extension'] != 'All':
+                    query += " AND file_extension = ?"
+                    params.append(filters['extension'])
+                
+                if filters['date_range'] != 'All':
+                    if filters['date_range'] == 'Today':
+                        query += " AND DATE(event_timestamp) = DATE('now')"
+                    elif filters['date_range'] == 'Last 7 days':
+                        query += " AND event_timestamp >= datetime('now', '-7 days')"
+                    elif filters['date_range'] == 'Last 30 days':
+                        query += " AND event_timestamp >= datetime('now', '-30 days')"
+            
+            query += " ORDER BY event_timestamp DESC"
+            print(f"Executing query: {query} with params: {params}")
+            
+            cursor.execute(query, params)
+            return cursor.fetchall()
+            
+        except Exception as e:
+            print(f"Database error: {e}")
+            return []

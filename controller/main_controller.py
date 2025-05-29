@@ -50,51 +50,16 @@ class WatcherController:
             try:
                 self.query_window.focus()
             except tk.TclError:
-                # 기존 윈도우가 닫혔으면 새로 생성
                 self.query_window = QueryWindow(self.myView.myRoot, self)
-                self.query_window.grab_set()  # 모달 윈도우로 설정
+                self.query_window.grab_set()
         else:
-            # 처음 열 때
             self.query_window = QueryWindow(self.myView.myRoot, self)
-            self.query_window.grab_set()  # 모달 윈도우로 설정
+            self.query_window.grab_set()
 
     def query_events(self, filters=None):
-        """Query events from database with combined filters"""
-        from model.db_handler import get_connection
-        
-        try:
-            with get_connection() as conn:
-                cursor = conn.cursor()
-                
-                query = "SELECT * FROM events WHERE 1=1"
-                params = []
-                
-                if filters:
-                    if filters['event_type'] != 'All':
-                        query += " AND event = ?"
-                        params.append(filters['event_type'])
-                    
-                    if filters['extension'] != 'All':
-                        query += " AND file_extension = ?"
-                        params.append(filters['extension'])
-                    
-                    if filters['date_range'] != 'All':
-                        if filters['date_range'] == 'Today':
-                            query += " AND DATE(event_timestamp) = DATE('now')"
-                        elif filters['date_range'] == 'Last 7 days':
-                            query += " AND event_timestamp >= datetime('now', '-7 days')"
-                        elif filters['date_range'] == 'Last 30 days':
-                            query += " AND event_timestamp >= datetime('now', '-30 days')"
-                
-                query += " ORDER BY event_timestamp DESC"
-                print(f"Executing query: {query} with params: {params}")
-                
-                cursor.execute(query, params)
-                return cursor.fetchall()
-                
-        except Exception as e:
-            print(f"Database error: {e}")
-            return []
+        """Forward query request to db_handler"""
+        from model.db_handler import query_events
+        return query_events(filters)
 
     def reset_database(self):
         """Reset database through db_handler"""
