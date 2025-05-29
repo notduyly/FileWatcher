@@ -13,17 +13,19 @@ def init_db():
             return
         with conn:
             conn.execute('''
-                CREATE TABLE IF NOT EXISTS users (
+                CREATE TABLE IF NOT EXISTS events (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    username TEXT NOT NULL UNIQUE,
-                    password TEXT NOT NULL
+                    filename TEXT NOT NULL,
+                    file_path TEXT NOT NULL,
+                    file_extension TEXT NOT NULL,
+                    event TEXT NOT NULL,
+                    event_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    file_size INTEGER,
+                    user TEXT
                 )
             ''')
-            conn.execute('''
-                CREATE TABLE IF NOT EXISTS posts (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    user_id INTEGER NOT NULL,
-                    content TEXT NOT NULL,
-                    FOREIGN KEY (user_id) REFERENCES users (id)
-                )
-            ''')
+
+if __name__ == "__main__":
+    print("Initializing database...")
+    init_db()
+    print("Database initialized successfully!")
