@@ -65,7 +65,7 @@ class QueryWindow(tk.Toplevel):
         # Add Reset DB button
         ttk.Button(bottom_frame, text="Reset Database", 
                   command=self.reset_database,
-                  style='Danger.TButton').pack(side="right", padx=20)  # 오른쪽에 배치
+                  style='Danger.TButton').pack(side="right", padx=20)
         
         # Create danger style for reset button
         danger_style = ttk.Style()
