@@ -1,8 +1,14 @@
 import sys
 import os
+import tkinter as tk
 
 from model.fileWatcher import FileWatcher
 from model.eventHandler import MyEventHandler
+from model.db_handler import (
+    query_events, 
+    export_to_csv as db_export_to_csv,
+    reset_database as db_reset
+)
 from view.query_window import QueryWindow
 from tkinter import filedialog
 
@@ -52,3 +58,32 @@ class WatcherController:
                 self.__query_window = QueryWindow(self.__myView.get_root(), self)
         else:
             self.__query_window = QueryWindow(self.__myView.get_root(), self)
+
+    def get_filtered_events(self, filters):
+        """Get filtered events from database"""
+        return query_events(filters)
+
+    def export_to_csv(self, file_path, events):
+        """Export events to CSV file"""
+        try:
+            return db_export_to_csv(file_path, events)
+        except Exception as e:
+            print(f"Error exporting to CSV: {e}")
+            return False
+
+    def reset_database(self):
+        """Reset the database"""
+        try:
+            return db_reset()
+        except Exception as e:
+            print(f"Error resetting database: {e}")
+            return False
+
+    def send_email_results(self, recipient, file_path):
+        """Send email with results"""
+        try:
+            # Email sending logic here
+            return True
+        except Exception as e:
+            print(f"Error sending email: {e}")
+            return False

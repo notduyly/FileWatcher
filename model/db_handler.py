@@ -11,9 +11,10 @@ def init_db():
 
 def insert_event(event_type, file_path):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    file_name = os.path.basename(file_path)
+    abs_path = os.path.abspath(file_path)
+    file_name = os.path.basename(abs_path)
     file_extension = os.path.splitext(file_name)[1]
-    file_size = os.path.getsize(file_path) if os.path.isfile(file_path) else None
+    file_size = os.path.getsize(abs_path) if os.path.isfile(abs_path) else None
     user = getpass.getuser()
 
     with get_connection() as conn:
@@ -27,7 +28,7 @@ def insert_event(event_type, file_path):
                 )
                 VALUES (?, ?, ?, ?, ?, ?, ?)
             """, (
-                file_name, file_path, file_extension, event_type,
+                file_name, abs_path, file_extension, event_type,
                 timestamp, file_size, user
             ))
 

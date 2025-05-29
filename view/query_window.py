@@ -1,19 +1,12 @@
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 from datetime import datetime, timedelta
-from model.db_handler import (
-    fetch_all_events, 
-    fetch_event_by_type,
-    fetch_event_by_extension,
-    fetch_event_by_after_date,
-    export_to_csv,
-    reset_database
-)
+import os
 
 class QueryWindow(tk.Toplevel):
-    def __init__(self, master, theController):
+    def __init__(self, master, controller):
         super().__init__(master)
-        self.__myController = theController
+        self.controller = controller
         self.title("Database Query")
         self.geometry("1000x600")
         
@@ -21,57 +14,53 @@ class QueryWindow(tk.Toplevel):
         filter_frame = ttk.LabelFrame(self, text="Query Filters")
         filter_frame.pack(fill="x", padx=5, pady=5)
         
-        # Query type filter
-        ttk.Label(filter_frame, text="Query Type:").grid(row=0, column=0, padx=5, pady=5)
-        self.__query_type_var = tk.StringVar(value="all")
-        self.__query_type_combo = ttk.Combobox(filter_frame, textvariable=self.__query_type_var)
-        self.__query_type_combo['values'] = ['All Events', 'By Event Type', 'By Extension', 'By Date']
-        self.__query_type_combo.grid(row=0, column=1, padx=5, pady=5)
+        # Event type filter
+        ttk.Label(filter_frame, text="Event Type:").grid(row=0, column=0, padx=5, pady=5)
+        self.event_type_var = tk.StringVar(value="All")
+        self.event_type_combo = ttk.Combobox(filter_frame, textvariable=self.event_type_var)
+        self.event_type_combo['values'] = ['All', 'created', 'modified', 'deleted']
+        self.event_type_combo.grid(row=0, column=1, padx=5, pady=5)
+        self.event_type_combo.bind('<<ComboboxSelected>>', lambda e: self.perform_query())
         
         # Extension filter
         ttk.Label(filter_frame, text="File Extension:").grid(row=1, column=0, padx=5, pady=5)
-        self.__ext_var = tk.StringVar(value="All")
-        self.__ext_combo = ttk.Combobox(filter_frame, textvariable=self.__ext_var)
-        self.__ext_combo['values'] = ['All', '.txt', '.png', '.jpg']
-        self.__ext_combo.grid(row=1, column=1, padx=5, pady=5)
+        self.ext_var = tk.StringVar(value="All")
+        self.ext_combo = ttk.Combobox(filter_frame, textvariable=self.ext_var)
+        self.ext_combo['values'] = ['All', '.txt', '.png', '.jpg', '.py']
+        self.ext_combo.grid(row=1, column=1, padx=5, pady=5)
+        self.ext_combo.bind('<<ComboboxSelected>>', lambda e: self.perform_query())
         
         # Date filter
         ttk.Label(filter_frame, text="Date Range:").grid(row=2, column=0, padx=5, pady=5)
-        self.__date_var = tk.StringVar(value="All")
+        self.date_var = tk.StringVar(value="All")
         date_options = ["All", "Today", "Last 7 days", "Last 30 days"]
-        self.__date_combo = ttk.Combobox(filter_frame, textvariable=self.__date_var, values=date_options)
-        self.__date_combo.grid(row=2, column=1, padx=5, pady=5)
-        
+        self.date_combo = ttk.Combobox(filter_frame, textvariable=self.date_var, values=date_options)
+        self.date_combo.grid(row=2, column=1, padx=5, pady=5)
+        self.date_combo.bind('<<ComboboxSelected>>', lambda e: self.perform_query())
+
         # Search button
         ttk.Button(filter_frame, text="Search", command=self.perform_query).grid(row=3, column=0, columnspan=2, pady=10)
         
-        # Results treeview with updated columns
-        columns = ("ID", "Filename", "File Path", "File Extension", 
-                "Event", "Event Timestamp", "File Size", "Is Directory", "User")
-        self.__tree = ttk.Treeview(self, columns=columns, show="headings")
+        # Results treeview with simplified columns
+        cols = ("Filename", "Extension", "Path", "Event", "Timestamp")
+        self.tree = ttk.Treeview(self, columns=cols, show='headings')
         
-        # Configure column headings and widths
-        column_widths = {
-            "ID": 20,
-            "Filename": 100,
-            "File Path": 200,
-            "File Extension": 30,
-            "Event": 50,
-            "Event Timestamp": 150,
-            "File Size": 50,
-            "Is Directory": 50,
-            "User": 80
-        }
+        # Configure columns like setup_window.py
+        self.tree.column("Filename", width=75, anchor=tk.W)
+        self.tree.column("Extension", width=75, anchor=tk.W)
+        self.tree.column("Path", width=400, anchor=tk.W)
+        self.tree.column("Event", width=100, anchor=tk.W)
+        self.tree.column("Timestamp", width=150, anchor=tk.W)
         
-        for col, width in column_widths.items():
-            self.__tree.heading(col, text=col)
-            self.__tree.column(col, width=width)
+        # Set column headings
+        for col in cols:
+            self.tree.heading(col, text=col)
 
         # Scrollbar
-        scrollbar = ttk.Scrollbar(self, orient="vertical", command=self.__tree.yview)
-        self.__tree.configure(yscrollcommand=scrollbar.set)
+        scrollbar = ttk.Scrollbar(self, orient="vertical", command=self.tree.yview)
+        self.tree.configure(yscrollcommand=scrollbar.set)
         
-        self.__tree.pack(fill="both", expand=True, padx=10, pady=10)
+        self.tree.pack(fill="both", expand=True, padx=10, pady=10)
         scrollbar.pack(side="right", fill="y")
         
         # Bottom frame for export and email
@@ -104,25 +93,42 @@ class QueryWindow(tk.Toplevel):
     
     def perform_query(self):
         # Clear existing items
-        for item in self.__tree.get_children():
-            self.__tree.delete(item)
+        for item in self.tree.get_children():
+            self.tree.delete(item)
         
-        query_type = self.__query_type_var.get()
+        # Get filter values
+        filters = {
+            'event_type': self.event_type_var.get(),
+            'extension': self.ext_var.get(),
+            'date_range': self.date_var.get()
+        }
+        print(f"Applied filters: {filters}")
         
-        if query_type == "By Event Type":
-            results = fetch_event_by_type(self.__event_type_var.get())
-        elif query_type == "By Extension":
-            results = fetch_event_by_extension(self.__ext_var.get())
-        elif query_type == "By Date":
-            results = fetch_event_by_after_date(self.__date_var.get())
-        else:  # All Events
-            results = fetch_all_events()
-
+        # Get results through controller
+        results = self.controller.get_filtered_events(filters)
+        print(f"Query returned {len(results) if results else 0} results")
+        
         if results:
             for event in results:
-                self.__tree.insert("", "end", values=event)
-        
-        self.__db_results = results
+                try:
+                    file_path = event[2]  # 데이터베이스에서 가져온 전체 경로
+                    filename = os.path.basename(file_path)
+                    extension = os.path.splitext(filename)[1] or "(none)"
+                    
+                    # 현재 작업 디렉토리 기준으로 경로 표시
+                    display_path = file_path.replace(os.getcwd() + os.sep, '')
+                    
+                    self.tree.insert('', 0, values=(
+                        filename,
+                        extension,
+                        display_path,  # 상대 경로로 표시
+                        event[4],      # event_type
+                        event[5]       # timestamp
+                    ))
+                except Exception as e:
+                    print(f"Error processing event: {e}")
+    
+        self.db_results = results
 
     def export_to_csv(self):
         file_path = filedialog.asksaveasfilename(
@@ -132,9 +138,9 @@ class QueryWindow(tk.Toplevel):
         if not file_path:
             return
 
-        if export_to_csv(file_path, self.__db_results):
+        if self.controller.export_to_csv(file_path, self.db_results):
             messagebox.showinfo("Success", f"CSV exported to {file_path}")
-            self.__last_exported_file = file_path
+            self.last_exported_file = file_path
         else:
             messagebox.showerror("Error", "Failed to export CSV")
 
@@ -154,12 +160,11 @@ class QueryWindow(tk.Toplevel):
             messagebox.showerror("Error", "Failed to send email.")
     
     def reset_database(self):
-        """Reset the database after confirmation"""
         if messagebox.askyesno("Confirm Reset", 
                             "Are you sure you want to reset the database?\n"
                             "This action cannot be undone!"):
-            if reset_database():
+            if self.controller.reset_database():
                 messagebox.showinfo("Success", "Database has been reset successfully")
-                self.perform_query()  # Refresh the view
+                self.perform_query()
             else:
                 messagebox.showerror("Error", "Failed to reset database")
