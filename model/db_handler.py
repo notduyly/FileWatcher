@@ -11,9 +11,10 @@ def init_db():
 
 def insert_event(event_type, file_path):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    file_name = os.path.basename(file_path)
+    abs_path = os.path.abspath(file_path)
+    file_name = os.path.basename(abs_path)
     file_extension = os.path.splitext(file_name)[1]
-    file_size = os.path.getsize(file_path) if os.path.isfile(file_path) else None
+    file_size = os.path.getsize(abs_path) if os.path.isfile(abs_path) else None
     user = getpass.getuser()
 
     with get_connection() as conn:
@@ -27,7 +28,7 @@ def insert_event(event_type, file_path):
                 )
                 VALUES (?, ?, ?, ?, ?, ?, ?)
             """, (
-                file_name, file_path, file_extension, event_type,
+                file_name, abs_path, file_extension, event_type,
                 timestamp, file_size, user
             ))
 
@@ -39,16 +40,15 @@ def delete_event(theEventId: int):
             conn.execute('DELETE FROM events WHERE id = ?', (theEventId,))
 
 def reset_database():
-    """Reset the database by dropping and recreating the table"""
+    """Reset the events table"""
     with get_connection() as conn:
         if conn is None:
             return False
         try:
             cursor = conn.cursor()
-            # Drop existing table
             cursor.execute('DROP TABLE IF EXISTS events')
-            # Recreate table
-            initialize_database()
+            from .database import init_db
+            init_db()
             return True
         except Exception as e:
             print(f"Error resetting database: {e}")
@@ -189,3 +189,13 @@ def query_events(filters=None):
         except Exception as e:
             print(f"Database error: {e}")
             return []
+
+def get_unique_extensions():
+    """Get list of unique file extensions from database"""
+    with get_connection() as conn:
+        if conn is None:
+            return []
+        cursor = conn.cursor()
+        cursor.execute('SELECT DISTINCT file_extension FROM events WHERE file_extension != ""')
+        extensions = cursor.fetchall()
+        return ['All'] + [ext[0] for ext in extensions if ext[0]]
