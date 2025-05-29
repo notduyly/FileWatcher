@@ -51,13 +51,15 @@ class WatcherController:
         
     def open_query_window(self):
         """Open database query window"""
-        if hasattr(self, 'query_window') and self.__query_window is not None:
-            try:
+        try:
+            if hasattr(self, '__query_window') and self.__query_window is not None:
                 self.__query_window.focus()
-            except tk.TclError:
+            else:
                 self.__query_window = QueryWindow(self.__myView.get_root(), self)
-        else:
+                self.__query_window.grab_set()
+        except tk.TclError:
             self.__query_window = QueryWindow(self.__myView.get_root(), self)
+            self.__query_window.grab_set()
 
     def get_filtered_events(self, filters):
         """Get filtered events from database"""
@@ -82,8 +84,13 @@ class WatcherController:
     def send_email_results(self, recipient, file_path):
         """Send email with results"""
         try:
-            # Email sending logic here
+            # Code for sending email
             return True
         except Exception as e:
             print(f"Error sending email: {e}")
             return False
+
+    def get_available_extensions(self):
+        """Get list of available file extensions"""
+        from model.db_handler import get_unique_extensions
+        return get_unique_extensions()

@@ -189,3 +189,13 @@ def query_events(filters=None):
         except Exception as e:
             print(f"Database error: {e}")
             return []
+
+def get_unique_extensions():
+    """Get list of unique file extensions from database"""
+    with get_connection() as conn:
+        if conn is None:
+            return []
+        cursor = conn.cursor()
+        cursor.execute('SELECT DISTINCT file_extension FROM events WHERE file_extension != ""')
+        extensions = cursor.fetchall()
+        return ['All'] + [ext[0] for ext in extensions if ext[0]]
