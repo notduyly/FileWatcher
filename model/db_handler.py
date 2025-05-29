@@ -128,8 +128,15 @@ def fetch_event_by_after_date(date_range='All'):
         
         return cursor.fetchall()
 
-def export_to_csv(theFilename: str):
-    events = fetch_all_events()
+def export_to_csv(theFilename: str, events=None):
+    """Export events to CSV file
+    Args:
+        theFilename (str): Path to save CSV file
+        events (list, optional): List of events to export. If None, fetch all events.
+    """
+    if events is None:
+        events = fetch_all_events()
+        
     with open(theFilename, mode='w', newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
         writer.writerow([
@@ -137,7 +144,8 @@ def export_to_csv(theFilename: str):
             'Event', 'Event Timestamp', 'File Size', 'Is Directory', 'User'
         ])
         writer.writerows(events)
-    print(f"✅ Data exported to {theFilename} successfully.")
+    print(f"Data exported to {theFilename} successfully.")
+    return True
 
 def get_event_count():
     with get_connection() as conn:
