@@ -3,29 +3,18 @@ import csv
 import os
 from datetime import datetime
 import getpass
-from .database import get_connection
+from .database import get_connection, init_db as initialize_database
 
-def init_event_table():
-    with get_connection() as conn:
-        if conn is None:
-            return
-        with conn:
-            conn.execute('''
-                CREATE TABLE IF NOT EXISTS events (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    filename TEXT NOT NULL,
-                    file_extension TEXT NOT NULL,
-                    event_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-                    file_size INTEGER NOT NULL,
-                    event TEXT NOT NULL
-                )
-            ''')
+def init_db():
+    """Initialize database by calling database.py's init_db function"""
+    return initialize_database()
 
-def insert_event(event_type, file_path, is_directory=False):
+def insert_event(event_type, file_path):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    file_name = os.path.basename(file_path)
+    abs_path = os.path.abspath(file_path)
+    file_name = os.path.basename(abs_path)
     file_extension = os.path.splitext(file_name)[1]
-    file_size = os.path.getsize(file_path) if not is_directory and os.path.isfile(file_path) else None
+    file_size = os.path.getsize(abs_path) if os.path.isfile(abs_path) else None
     user = getpass.getuser()
 
     with get_connection() as conn:
@@ -34,13 +23,13 @@ def insert_event(event_type, file_path, is_directory=False):
         with conn:
             conn.execute("""
                 INSERT INTO events (
-                    timestamp, event_type, file_path, file_name,
-                    file_extension, file_size, is_directory, user
+                    filename, file_path, file_extension, event,
+                    event_timestamp, file_size, user
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
             """, (
-                timestamp, event_type, file_path, file_name,
-                file_extension, file_size, is_directory, user
+                file_name, abs_path, file_extension, event_type,
+                timestamp, file_size, user
             ))
 
 def delete_event(theEventId: int):
@@ -50,14 +39,20 @@ def delete_event(theEventId: int):
         with conn:
             conn.execute('DELETE FROM events WHERE id = ?', (theEventId,))
 
-def reset_db():
+def reset_database():
+    """Reset the events table"""
     with get_connection() as conn:
         if conn is None:
-            return
-        with conn:
-            conn.execute('DROP TABLE IF EXISTS users')
-            conn.execute('DROP TABLE IF EXISTS posts')
-            conn.execute('DROP TABLE IF EXISTS events')
+            return False
+        try:
+            cursor = conn.cursor()
+            cursor.execute('DROP TABLE IF EXISTS events')
+            from .database import init_db
+            init_db()
+            return True
+        except Exception as e:
+            print(f"Error resetting database: {e}")
+            return False
 
 def fetch_all_events():
     with get_connection() as conn:
@@ -67,37 +62,80 @@ def fetch_all_events():
         cursor.execute('SELECT * FROM events')
         return cursor.fetchall()
 
-def fetch_event_by_type():
+def fetch_event_by_type(event_type='All'):
+    """Fetch events filtered by event type"""
     with get_connection() as conn:
         if conn is None:
             return []
         cursor = conn.cursor()
-        cursor.execute('SELECT event, COUNT(*) FROM events GROUP BY event')
+        
+        if event_type == 'All':
+            cursor.execute('''
+                SELECT * FROM events 
+                ORDER BY event_timestamp DESC
+            ''')
+        else:
+            cursor.execute('''
+                SELECT * FROM events 
+                WHERE event = ? 
+                ORDER BY event_timestamp DESC
+            ''', (event_type,))
+            
         return cursor.fetchall()
 
-def fetch_event_by_extension():
+def fetch_event_by_extension(extension='All'):
+    """Fetch events filtered by file extension"""
     with get_connection() as conn:
         if conn is None:
             return []
         cursor = conn.cursor()
-        cursor.execute('SELECT file_extension, COUNT(*) FROM events GROUP BY file_extension')
+        
+        if extension == 'All':
+            cursor.execute('''
+                SELECT * FROM events 
+                ORDER BY event_timestamp DESC
+            ''')
+        else:
+            cursor.execute('''
+                SELECT * FROM events 
+                WHERE file_extension = ? 
+                ORDER BY event_timestamp DESC
+            ''', (extension,))
+            
         return cursor.fetchall()
 
-def fetch_event_by_after_date(theDate: str):
+def fetch_event_by_after_date(date_range='All'):
+    """Fetch events filtered by date range"""
     with get_connection() as conn:
         if conn is None:
             return []
         cursor = conn.cursor()
-        cursor.execute('SELECT * FROM events WHERE event_timestamp > ?', (theDate,))
+        
+        if date_range == 'All':
+            cursor.execute('SELECT * FROM events ORDER BY event_timestamp DESC')
+        elif date_range == 'Today':
+            cursor.execute('SELECT * FROM events WHERE DATE(event_timestamp) = DATE("now") ORDER BY event_timestamp DESC')
+        elif date_range == 'Last 7 days':
+            cursor.execute('SELECT * FROM events WHERE event_timestamp >= datetime("now", "-7 days") ORDER BY event_timestamp DESC')
+        elif date_range == 'Last 30 days':
+            cursor.execute('SELECT * FROM events WHERE event_timestamp >= datetime("now", "-30 days") ORDER BY event_timestamp DESC')
+        
         return cursor.fetchall()
 
-def export_to_csv(theFilename: str):
-    events = fetch_all_events()
-    with open(theFilename, mode='w', newline='') as file:
+def export_to_csv(theFilename: str, events=None):
+    """Export events to CSV file"""
+    if events is None:
+        events = fetch_all_events()
+        
+    with open(theFilename, mode='w', newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
-        writer.writerow(['ID', 'Filename', 'File Extension', 'Event Timestamp', 'File Size', 'Event'])
+        writer.writerow([
+            'ID', 'Filename', 'File Path', 'File Extension',
+            'Event', 'Event Timestamp', 'File Size', 'User'
+        ])
         writer.writerows(events)
     print(f"Data exported to {theFilename} successfully.")
+    return True
 
 def get_event_count():
     with get_connection() as conn:
@@ -114,3 +152,50 @@ def get_event_by_id(theEventId: int):
         cursor = conn.cursor()
         cursor.execute('SELECT * FROM events WHERE id = ?', (theEventId,))
         return cursor.fetchone()
+
+def query_events(filters=None):
+    """Query events from database with combined filters"""
+    with get_connection() as conn:
+        if conn is None:
+            return []
+        try:
+            cursor = conn.cursor()
+            query = "SELECT * FROM events WHERE 1=1"
+            params = []
+            
+            if filters:
+                if filters['event_type'] != 'All':
+                    query += " AND event = ?"
+                    params.append(filters['event_type'])
+                
+                if filters['extension'] != 'All':
+                    query += " AND file_extension = ?"
+                    params.append(filters['extension'])
+                
+                if filters['date_range'] != 'All':
+                    if filters['date_range'] == 'Today':
+                        query += " AND DATE(event_timestamp) = DATE('now')"
+                    elif filters['date_range'] == 'Last 7 days':
+                        query += " AND event_timestamp >= datetime('now', '-7 days')"
+                    elif filters['date_range'] == 'Last 30 days':
+                        query += " AND event_timestamp >= datetime('now', '-30 days')"
+            
+            query += " ORDER BY event_timestamp DESC"
+            print(f"Executing query: {query} with params: {params}")
+            
+            cursor.execute(query, params)
+            return cursor.fetchall()
+            
+        except Exception as e:
+            print(f"Database error: {e}")
+            return []
+
+def get_unique_extensions():
+    """Get list of unique file extensions from database"""
+    with get_connection() as conn:
+        if conn is None:
+            return []
+        cursor = conn.cursor()
+        cursor.execute('SELECT DISTINCT file_extension FROM events WHERE file_extension != ""')
+        extensions = cursor.fetchall()
+        return ['All'] + [ext[0] for ext in extensions if ext[0]]

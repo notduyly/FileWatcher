@@ -1,18 +1,21 @@
 from view.menubar import MenuBar
-from .setup_window import setupWindow
+from .setup_window import SetupWindow
 
 class FileWatcherGUI:
     def __init__(self, theRoot, theController):
-        self.myRoot = theRoot
-        self.myController = theController
-        self.myWindow = setupWindow(theRoot, theController)
-        self.myMenubar = MenuBar(theRoot)
+        self.__myRoot = theRoot
+        self.__myController = theController
+        self.__myWindow = SetupWindow(theRoot, theController)
+        self.__myMenubar = MenuBar(theRoot)
 
-        theRoot.config(menu=self.myMenubar.get_menubar())
-        theController.set_view(self)
+        self.__myRoot.config(menu=self.__myMenubar.get_menubar())
+        self.__myController.set_view(self)
 
     def add_log(self, theMessage):
-        self.myWindow.add_log(theMessage)
+        self.__myWindow.add_log(theMessage)
 
     def update_directory_display(self, theDirectory):
-        self.myWindow.update_directory_display(theDirectory)
+        self.__myWindow.update_directory_display(theDirectory)
+    
+    def get_root(self):
+        return self.__myRoot
