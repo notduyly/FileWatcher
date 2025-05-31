@@ -94,3 +94,8 @@ class WatcherController:
         """Get list of available file extensions"""
         from model.db_handler import get_unique_extensions
         return get_unique_extensions()
+
+    def save_events_to_database(self, events):
+        """Save events to database through db_handler"""
+        from model.db_handler import save_multiple_events
+        return save_multiple_events(events)

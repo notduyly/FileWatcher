@@ -3,6 +3,8 @@ import tkinter as tk
 from tkinter import ttk
 import os
 import datetime
+from tkinter import messagebox
+
 class SetupWindow:
     def __init__(self, theRoot, theController):
         self.__myRoot = theRoot
@@ -73,7 +75,16 @@ class SetupWindow:
             font=('Arial', 20),
             command=self.__myController.open_query_window
         )
-        query_button.pack(padx=10, pady=20)
+        query_button.pack(padx=10, pady=10)  # Changed padding
+
+        # Save Database Button
+        save_button = tk.Button(
+            self.__myRoot,
+            text='Save Database',
+            font=('Arial', 20),
+            command=self.__save_to_database
+        )
+        save_button.pack(padx=10, pady=10)
 
         # TextBox to show changes
         cols = ("Filename","Extension","Path","Event","Timestamp")
@@ -129,3 +140,28 @@ class SetupWindow:
             self.__directory_label.config(text=f"Selected directory: {theDirectory}")
         else:
             self.__directory_label.config(text="No directory selected")
+    
+    def __save_to_database(self):
+        """Save current events to database after confirmation"""
+        if not self.__tree.get_children():
+            messagebox.showwarning("Warning", "No events to save.")
+            return
+            
+        if messagebox.askyesno("Confirm Save", 
+                              "Do you want to save these events to the database?\n"
+                              "This will add new events to existing data."):
+            events = []
+            for item in self.__tree.get_children():
+                values = self.__tree.item(item)['values']
+                events.append({
+                    'filepath': values[2],    # Full path
+                    'event_type': values[3],  # Event type
+                })
+            
+            if self.__myController.save_events_to_database(events):
+                messagebox.showinfo("Success", "Events saved to database successfully")
+                # Clear the tree view after successful save
+                for item in self.__tree.get_children():
+                    self.__tree.delete(item)
+            else:
+                messagebox.showerror("Error", "Failed to save events to database")

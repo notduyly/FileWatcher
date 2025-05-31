@@ -199,3 +199,39 @@ def get_unique_extensions():
         cursor.execute('SELECT DISTINCT file_extension FROM events WHERE file_extension != ""')
         extensions = cursor.fetchall()
         return ['All'] + [ext[0] for ext in extensions if ext[0]]
+
+def save_multiple_events(events):
+    """Save multiple events to database at once"""
+    if not events:
+        return False
+        
+    try:
+        with get_connection() as conn:
+            if conn is None:
+                return False
+            
+            cursor = conn.cursor()
+            for event in events:
+                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                file_path = event['filepath']
+                filename = os.path.basename(file_path)
+                extension = os.path.splitext(filename)[1]
+                file_size = os.path.getsize(file_path) if os.path.isfile(file_path) else None
+                user = getpass.getuser()
+
+                cursor.execute("""
+                    INSERT INTO events (
+                        filename, file_path, file_extension, event,
+                        event_timestamp, file_size, user
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    filename, file_path, extension, event['event_type'],
+                    timestamp, file_size, user
+                ))
+            
+            conn.commit()
+            return True
+    except Exception as e:
+        print(f"Error saving events to database: {e}")
+        return False
