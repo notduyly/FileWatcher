@@ -142,7 +142,6 @@ class SetupWindow:
             self.__directory_label.config(text="No directory selected")
     
     def __save_to_database(self):
-        """Save current events to database after confirmation"""
         if not self.__tree.get_children():
             messagebox.showwarning("Warning", "No events to save.")
             return
@@ -154,13 +153,13 @@ class SetupWindow:
             for item in self.__tree.get_children():
                 values = self.__tree.item(item)['values']
                 events.append({
-                    'filepath': values[2],    # Full path
-                    'event_type': values[3],  # Event type
+                    'filepath': values[2],
+                    'event_type': values[3],
                 })
             
             if self.__myController.save_events_to_database(events):
-                messagebox.showinfo("Success", "Events saved to database successfully")
-                # Clear the tree view after successful save
+                messagebox.showinfo("Success", "Events saved to database.")
+                # Clear the logs after save
                 for item in self.__tree.get_children():
                     self.__tree.delete(item)
             else:

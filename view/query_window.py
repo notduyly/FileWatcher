@@ -146,7 +146,6 @@ class QueryWindow(tk.Toplevel):
         if not file_path:
             return
 
-        # controller -> __myController
         if self.__myController.export_to_csv(file_path, self.__db_results):
             messagebox.showinfo("Success", f"CSV exported to {file_path}")
             self.__last_exported_file = file_path
@@ -172,7 +171,6 @@ class QueryWindow(tk.Toplevel):
         if messagebox.askyesno("Confirm Reset", 
                             "Are you sure you want to reset the database?\n"
                             "This action cannot be undone!"):
-            # controller -> __myController
             if self.__myController.reset_database():
                 messagebox.showinfo("Success", "Database has been reset successfully")
                 self.__perform_query()
