@@ -1,6 +1,5 @@
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
-from datetime import datetime, timedelta
 import os
 
 class QueryWindow(tk.Toplevel):
@@ -90,11 +89,10 @@ class QueryWindow(tk.Toplevel):
                 command=self.send_email).pack(side="left", padx=5)
         
         # Initial query
+        self.__last_exported_file = None
         self.__perform_query()
     
     def __perform_query(self):
-        """Perform database query with current filters and refresh extension list"""
-        # Clear existing items
         for item in self.__myTree.get_children():
             self.__myTree.delete(item)
         
@@ -113,26 +111,14 @@ class QueryWindow(tk.Toplevel):
             'extension': self.__myExtVar.get(),
             'date_range': self.__myDateVar.get()
         }
-        print(f"Applied filters: {filters}")
         
+        # Get and display results
         results = self.__myController.get_filtered_events(filters)
-        print(f"Query returned {len(results) if results else 0} results")
-        
         if results:
             for event in results:
                 try:
-                    file_path = event[2]
-                    filename = os.path.basename(file_path)
-                    extension = os.path.splitext(filename)[1] or "(none)"
-                    display_path = file_path.replace(os.getcwd() + os.sep, '')
-                    
-                    self.__myTree.insert('', 0, values=(
-                        filename,
-                        extension,
-                        display_path,
-                        event[4],
-                        event[5]
-                    ))
+                    formatted_event = self.__myController.format_event(event)
+                    self.__myTree.insert('', 0, values=formatted_event)
                 except Exception as e:
                     print(f"Error processing event: {e}")
     
@@ -148,21 +134,25 @@ class QueryWindow(tk.Toplevel):
 
         if self.__myController.export_to_csv(file_path, self.__db_results):
             messagebox.showinfo("Success", f"CSV exported to {file_path}")
-            self.__last_exported_file = file_path
         else:
             messagebox.showerror("Error", "Failed to export CSV")
 
     def send_email(self):
         recipient = self.__email_entry.get()
-        if not recipient:
-            messagebox.showwarning("Input Error", "Please enter recipient email.")
+        
+        if not self.__myController.validate_email(recipient):
+            messagebox.showwarning("Input Error", "Please enter valid email address.")
             return
         
-        if not hasattr(self, "last_exported_file"):
-            messagebox.showwarning("Missing File", "Please export to CSV first.")
-            return
+        file_path = filedialog.askopenfilename(
+            title="Select CSV file to attach",
+            filetypes=[("CSV files", "*.csv")]
+        )
         
-        if self.__myController.send_email_results(recipient, self.__last_exported_file):
+        if not file_path:
+            return
+            
+        if self.__myController.send_email_results(recipient, file_path):
             messagebox.showinfo("Success", "Email sent successfully.")
         else:
             messagebox.showerror("Error", "Failed to send email.")

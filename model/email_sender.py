@@ -46,71 +46,37 @@ def send_email(service, to, subject, body_text, attachment_path=None):
     }
     
     send_message = service.users().messages().send(userId="me", body=create_message).execute()
-    print(f"✅ Message Id: {send_message['id']}")
+    print(f"Message Id: {send_message['id']}")
     return send_message
 
-
-
-
-# test
-def send_email_with_csv(service, to: str, subject: str, body_text: str, csv_data: list, 
-                       csv_filename: str = "export.csv") -> dict:
-    """
-    Send email with CSV file attachment generated from data
-    
-    Args:
-        service: Gmail API service instance
-        to: Recipient email address
-        subject: Email subject
-        body_text: Email body content
-        csv_data: List of data to write to CSV
-        csv_filename: Name of the CSV file (default: export.csv)
-        
-    Returns:
-        dict: Message details from Gmail API
-    """
-    import csv
-    import tempfile
-    
-    # Create temporary CSV file
-    with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.csv') as temp_file:
-        writer = csv.writer(temp_file)
-        writer.writerows(csv_data)
-        temp_path = temp_file.name
-        
+def send_email_with_attachment(recipient: str, file_path: str) -> bool:
     try:
-        # Send email with CSV attachment
-        result = send_email(service, to, subject, body_text, temp_path)
-        return result
-    finally:
-        # Clean up temporary file
-        if os.path.exists(temp_path):
-            os.remove(temp_path)
+        service = gmail_authenticate()
+        if not service:
+            print("Failed to authenticate Gmail")
+            return False
+            
+        subject = "File Watch Events Report"
+        body_text = "Please find attached the file watch events report."
+        
+        if not os.path.exists(file_path):
+            print(f"CSV file not found: {file_path}")
+            return False
+            
+        send_email(
+            service=service,
+            to=recipient,
+            subject=subject,
+            body_text=body_text,
+            attachment_path=file_path
+        )
+        return True
+        
+    except Exception as e:
+        print(f"Error sending email: {e}")
+        return False
 
-# Usage example:
-def test_csv_email():
-    service = gmail_authenticate()
-    
-    # Sample CSV data
-    csv_data = [
-        ["Name", "Age", "City"],
-        ["John Doe", "30", "New York"],
-        ["Jane Smith", "25", "Los Angeles"]
-    ]
-    
-    result = send_email_with_csv(
-        service=service,
-        to="recipient@email.com",
-        subject="CSV Report",
-        body_text="Please find the attached CSV report.",
-        csv_data=csv_data,
-        csv_filename="report.csv"
-    )
-    
-    if result:
-        print("Email with CSV sent successfully!")
-    else:
-        print("Failed to send email with CSV.")
-
-if __name__ == "__main__":
-    test_csv_email()
+def validate_email(email: str) -> bool:
+    import re
+    pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+    return bool(re.match(pattern, email))
