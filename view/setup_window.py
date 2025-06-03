@@ -21,7 +21,7 @@ class SetupWindow:
             directory_frame,
             text='Open Directory',
             font=('Arial', 16),
-            command=self.__myController.open_directory
+            command=self.__myController.open_directory,
         )
         open_directory_button.pack(side=tk.LEFT, padx=5)
         self.__directory_label = tk.Label(

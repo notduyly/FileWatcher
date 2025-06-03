@@ -23,6 +23,10 @@ class WatcherController:
         self.__myView = theView
 
     def start_watching(self):
+        if not self.__myWatchDirectory:
+            print("No directory selected to watch.")
+            return
+        
         handler = MyEventHandler(logToTextbox=self.__myView.add_log)
 
         if self.__myFileExtension and self.__myFileExtension != 'None':

@@ -6,7 +6,7 @@ class FileWatcherGUI:
         self.__myRoot = theRoot
         self.__myController = theController
         self.__myWindow = SetupWindow(theRoot, theController)
-        self.__myMenubar = MenuBar(theRoot)
+        self.__myMenubar = MenuBar(theRoot, theController)
 
         self.__myRoot.config(menu=self.__myMenubar.get_menubar())
         self.__myController.set_view(self)
