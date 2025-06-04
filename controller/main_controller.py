@@ -5,13 +5,12 @@ import tkinter as tk
 from model.fileWatcher import FileWatcher
 from model.eventHandler import MyEventHandler
 from model.db_handler import (
-    query_events, 
-    export_to_csv as db_export_to_csv,
+    query_events,
     reset_database as db_reset
 )
 from view.query_window import QueryWindow
 from tkinter import filedialog
-from model.email_sender import gmail_authenticate, send_email_with_attachment
+from model.email_sender import send_email_with_attachment
 
 class WatcherController:
     def __init__(self):
@@ -61,15 +60,8 @@ class WatcherController:
             self.__query_window = QueryWindow(self.__myView.get_root(), self)
             self.__query_window.grab_set()
 
-    def get_filtered_events(self, filters):
-        return query_events(filters)
-
-    def export_to_csv(self, file_path, events):
-        try:
-            return db_export_to_csv(file_path, events)
-        except Exception as e:
-            print(f"Error exporting to CSV: {e}")
-            return False
+    def get_filtered_events(self, theFilters):
+        return query_events(theFilters)
 
     def reset_database(self):
         try:
@@ -78,25 +70,25 @@ class WatcherController:
             print(f"Error resetting database: {e}")
             return False
 
-    def send_email_results(self, recipient, file_path):
-        return send_email_with_attachment(recipient, file_path)
+    def send_email_results(self, recipient, thePath):
+        return send_email_with_attachment(recipient, thePath)
 
     def get_available_extensions(self):
         from model.db_handler import get_unique_extensions
         return get_unique_extensions()
 
-    def save_events_to_database(self, events):
+    def save_events_to_database(self, theEvents):
         from model.db_handler import save_multiple_events
-        return save_multiple_events(events)
+        return save_multiple_events(theEvents)
 
-    def format_event(self, event):
+    def format_event(self, theEvent):
         from model.db_handler import format_event_for_display
-        return format_event_for_display(event)
+        return format_event_for_display(theEvent)
 
-    def validate_email(self, email):
+    def validate_email(self, theEmail):
         from model.email_sender import validate_email
-        return validate_email(email)
+        return validate_email(theEmail)
 
-    def export_to_csv(self, file_path, events):
+    def export_to_csv(self, thePath, theEvents):
         from model.db_handler import export_events_to_csv
-        return export_events_to_csv(file_path, events)
+        return export_events_to_csv(thePath, theEvents)

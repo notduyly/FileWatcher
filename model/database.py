@@ -7,7 +7,7 @@ def get_connection():
         print(f"An error occurred while connecting to the database: {e}")
         return None
 
-def init_db():
+def _init_db():
     with get_connection() as conn:
         if conn is None:
             return
@@ -27,5 +27,5 @@ def init_db():
 
 if __name__ == "__main__":
     print("Initializing database...")
-    init_db()
+    _init_db()
     print("Database initialized successfully!")

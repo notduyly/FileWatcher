@@ -39,7 +39,7 @@ class QueryWindow(tk.Toplevel):
 
         # Search button
         ttk.Button(filter_frame, text="Search", 
-                  command=self.__perform_query).grid(row=3, column=0, columnspan=2, pady=10)
+                command=self.__perform_query).grid(row=3, column=0, columnspan=2, pady=10)
 
         # Results treeview with simplified columns
         cols = ("Filename", "Extension", "Path", "Event", "Timestamp")

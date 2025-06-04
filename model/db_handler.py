@@ -3,14 +3,12 @@ import csv
 import os
 from datetime import datetime
 import getpass
-from .database import get_connection, init_db as initialize_database
+from .database import get_connection
 
-def init_db():
-    return initialize_database()
 
-def insert_event(event_type, file_path):
+def insert_event(theEvent, thePath):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    abs_path = os.path.abspath(file_path)
+    abs_path = os.path.abspath(thePath)
     file_name = os.path.basename(abs_path)
     file_extension = os.path.splitext(file_name)[1]
     file_size = os.path.getsize(abs_path) if os.path.isfile(abs_path) else None
@@ -27,7 +25,7 @@ def insert_event(event_type, file_path):
                 )
                 VALUES (?, ?, ?, ?, ?, ?, ?)
             """, (
-                file_name, abs_path, file_extension, event_type,
+                file_name, abs_path, file_extension, theEvent,
                 timestamp, file_size, user
             ))
 
@@ -45,8 +43,8 @@ def reset_database():
         try:
             cursor = conn.cursor()
             cursor.execute('DROP TABLE IF EXISTS events')
-            from .database import init_db
-            init_db()
+            from .database import _init_db
+            _init_db()
             return True
         except Exception as e:
             print(f"Error resetting database: {e}")
@@ -60,13 +58,13 @@ def fetch_all_events():
         cursor.execute('SELECT * FROM events')
         return cursor.fetchall()
 
-def fetch_event_by_type(event_type='All'):
+def fetch_event_by_type(theEventType='All'):
     with get_connection() as conn:
         if conn is None:
             return []
         cursor = conn.cursor()
         
-        if event_type == 'All':
+        if theEventType == 'All':
             cursor.execute('''
                 SELECT * FROM events 
                 ORDER BY event_timestamp DESC
@@ -76,17 +74,17 @@ def fetch_event_by_type(event_type='All'):
                 SELECT * FROM events 
                 WHERE event = ? 
                 ORDER BY event_timestamp DESC
-            ''', (event_type,))
+            ''', (theEventType,))
             
         return cursor.fetchall()
 
-def fetch_event_by_extension(extension='All'):
+def fetch_event_by_extension(theExtension='All'):
     with get_connection() as conn:
         if conn is None:
             return []
         cursor = conn.cursor()
         
-        if extension == 'All':
+        if theExtension == 'All':
             cursor.execute('''
                 SELECT * FROM events 
                 ORDER BY event_timestamp DESC
@@ -96,40 +94,26 @@ def fetch_event_by_extension(extension='All'):
                 SELECT * FROM events 
                 WHERE file_extension = ? 
                 ORDER BY event_timestamp DESC
-            ''', (extension,))
+            ''', (theExtension,))
             
         return cursor.fetchall()
 
-def fetch_event_by_after_date(date_range='All'):
+def fetch_event_by_after_date(theDateRange='All'):
     with get_connection() as conn:
         if conn is None:
             return []
         cursor = conn.cursor()
         
-        if date_range == 'All':
+        if theDateRange == 'All':
             cursor.execute('SELECT * FROM events ORDER BY event_timestamp DESC')
-        elif date_range == 'Today':
+        elif theDateRange == 'Today':
             cursor.execute('SELECT * FROM events WHERE DATE(event_timestamp) = DATE("now") ORDER BY event_timestamp DESC')
-        elif date_range == 'Last 7 days':
+        elif theDateRange == 'Last 7 days':
             cursor.execute('SELECT * FROM events WHERE event_timestamp >= datetime("now", "-7 days") ORDER BY event_timestamp DESC')
-        elif date_range == 'Last 30 days':
+        elif theDateRange == 'Last 30 days':
             cursor.execute('SELECT * FROM events WHERE event_timestamp >= datetime("now", "-30 days") ORDER BY event_timestamp DESC')
         
         return cursor.fetchall()
-
-def export_to_csv(theFilename: str, events=None):
-    if events is None:
-        events = fetch_all_events()
-        
-    with open(theFilename, mode='w', newline='', encoding='utf-8') as file:
-        writer = csv.writer(file)
-        writer.writerow([
-            'ID', 'Filename', 'File Path', 'File Extension',
-            'Event', 'Event Timestamp', 'File Size', 'User'
-        ])
-        writer.writerows(events)
-    print(f"Data exported to {theFilename} successfully.")
-    return True
 
 def get_event_count():
     with get_connection() as conn:
@@ -147,7 +131,7 @@ def get_event_by_id(theEventId: int):
         cursor.execute('SELECT * FROM events WHERE id = ?', (theEventId,))
         return cursor.fetchone()
 
-def query_events(filters=None):
+def query_events(theFilters=None):
     with get_connection() as conn:
         if conn is None:
             return []
@@ -156,21 +140,21 @@ def query_events(filters=None):
             query = "SELECT * FROM events WHERE 1=1"
             params = []
             
-            if filters:
-                if filters.get('event_type') and filters['event_type'] != 'All':
+            if theFilters:
+                if theFilters.get('event_type') and theFilters['event_type'] != 'All':
                     query += " AND event LIKE ?"
-                    params.append(f"%{filters['event_type']}%")
+                    params.append(f"%{theFilters['event_type']}%")
                 
-                if filters.get('extension') and filters['extension'] != 'All':
+                if theFilters.get('extension') and theFilters['extension'] != 'All':
                     query += " AND file_extension = ?"
-                    params.append(filters['extension'])
+                    params.append(theFilters['extension'])
                 
-                if filters.get('date_range') and filters['date_range'] != 'All':
-                    if filters['date_range'] == 'Today':
+                if theFilters.get('date_range') and theFilters['date_range'] != 'All':
+                    if theFilters['date_range'] == 'Today':
                         query += " AND DATE(event_timestamp) = DATE('now')"
-                    elif filters['date_range'] == 'Last 7 days':
+                    elif theFilters['date_range'] == 'Last 7 days':
                         query += " AND event_timestamp >= datetime('now', '-7 days')"
-                    elif filters['date_range'] == 'Last 30 days':
+                    elif theFilters['date_range'] == 'Last 30 days':
                         query += " AND event_timestamp >= datetime('now', '-30 days')"
             
             query += " ORDER BY event_timestamp DESC"
@@ -195,8 +179,8 @@ def get_unique_extensions():
         extensions = cursor.fetchall()
         return ['All'] + [ext[0] for ext in extensions if ext[0]]
 
-def save_multiple_events(events):
-    if not events:
+def save_multiple_events(theEvents):
+    if not theEvents:
         return False
         
     try:
@@ -205,7 +189,7 @@ def save_multiple_events(events):
                 return False
             
             cursor = conn.cursor()
-            for event in events:
+            for event in theEvents:
                 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 file_path = event['filepath']
                 filename = os.path.basename(file_path)
@@ -230,8 +214,8 @@ def save_multiple_events(events):
         print(f"Error saving events to database: {e}")
         return False
 
-def format_event_for_display(event):
-    file_path = event[2]
+def format_event_for_display(theEvent):
+    file_path = theEvent[2]
     filename = os.path.basename(file_path)
     extension = os.path.splitext(filename)[1] or "(none)"
     display_path = os.path.relpath(file_path)
@@ -240,17 +224,17 @@ def format_event_for_display(event):
         filename,
         extension,
         display_path,
-        event[4],
-        event[5]
+        theEvent[4],
+        theEvent[5]
     )
 
-def export_events_to_csv(file_path, events):
+def export_events_to_csv(thePath, theEvents):
     try:
-        with open(file_path, 'w', newline='', encoding='utf-8') as f:
+        with open(thePath, 'w', newline='', encoding='utf-8') as f:
             writer = csv.writer(f)
             writer.writerow(['Filename', 'Extension', 'Path', 'Event', 'Timestamp'])
             
-            for event in events:
+            for event in theEvents:
                 formatted_event = format_event_for_display(event)
                 writer.writerow(formatted_event)
         return True

@@ -8,7 +8,7 @@ from googleapiclient.discovery import build
 
 SCOPES = ['https://www.googleapis.com/auth/gmail.send']
 
-def gmail_authenticate():
+def __gmail_authenticate():
     creds = None
     
     if os.path.exists('token.json'):
@@ -26,7 +26,7 @@ def gmail_authenticate():
             token.write(creds.to_json())
     return build('gmail', 'v1', credentials=creds)
 
-def send_email(service, to, subject, body_text, attachment_path=None):
+def __compose_email_message(service, to, subject, body_text, attachment_path=None):
     message = EmailMessage()
     message.set_content(body_text)
     message['To'] = to
@@ -38,7 +38,7 @@ def send_email(service, to, subject, body_text, attachment_path=None):
             file_data = f.read()
             file_name = os.path.basename(attachment_path)
         message.add_attachment(file_data, maintype='application',
-                               subtype='octet-stream', filename=file_name)
+                            subtype='octet-stream', filename=file_name)
 
     encoded_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
     create_message = {
@@ -51,7 +51,7 @@ def send_email(service, to, subject, body_text, attachment_path=None):
 
 def send_email_with_attachment(recipient: str, file_path: str) -> bool:
     try:
-        service = gmail_authenticate()
+        service = __gmail_authenticate()
         if not service:
             print("Failed to authenticate Gmail")
             return False
@@ -63,7 +63,7 @@ def send_email_with_attachment(recipient: str, file_path: str) -> bool:
             print(f"CSV file not found: {file_path}")
             return False
             
-        send_email(
+        __compose_email_message(
             service=service,
             to=recipient,
             subject=subject,

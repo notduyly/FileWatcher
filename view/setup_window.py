@@ -147,8 +147,8 @@ class SetupWindow:
             return
             
         if messagebox.askyesno("Confirm Save", 
-                              "Do you want to save these events to the database?\n"
-                              "This will add new events to existing data."):
+                            "Do you want to save these events to the database?\n"
+                            "This will add new events to existing data."):
             events = []
             for item in self.__tree.get_children():
                 values = self.__tree.item(item)['values']
