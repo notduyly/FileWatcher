@@ -11,8 +11,7 @@ class SetupWindow:
 
         # Init Window
         self.__myRoot.title('File System Watcher')
-        self.__myRoot.geometry('800x800')
-        # self.__myRoot.configure(bg='white')
+        self.__myRoot.geometry('800x500')
 
 
         # Directory frame
@@ -66,26 +65,26 @@ class SetupWindow:
                                             self.__fileExtensionSelection, 
                                             *[opt for opt in self.__fileExtensionOptions if opt != self.__fileExtensionSelection.get()])
         
-        self.__fileExtensionDropdown.pack(padx=10, pady=10)
+        self.__fileExtensionDropdown.pack(side=tk.LEFT, padx=5)
         self.__fileExtensionSelection.trace_add('write', self._handle_fileExtension_change)
 
         # Query Button
         query_button = tk.Button(
-            self.__myRoot,
+            control_frame,
             text='Query Database',
             font=('Arial', 16),
             command=self.__myController.open_query_window
         )
-        query_button.pack(padx=10, pady=10)
+        query_button.pack(side=tk.LEFT, padx=(250, 5))
 
         # Save Database Button
         save_button = tk.Button(
-            self.__myRoot,
+            control_frame,
             text='Save Database',
             font=('Arial', 16),
             command=self._save_to_database
         )
-        save_button.pack(padx=10, pady=10)
+        save_button.pack(side=tk.LEFT, padx=5)
 
         # TextBox to show changes
         cols = ("Filename","Extension","Path","Event","Timestamp")
