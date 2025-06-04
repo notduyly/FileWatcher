@@ -6,7 +6,6 @@ import getpass
 from .database import get_connection, init_db as initialize_database
 
 def init_db():
-    """Initialize database by calling database.py's init_db function"""
     return initialize_database()
 
 def insert_event(event_type, file_path):
@@ -40,7 +39,6 @@ def delete_event(theEventId: int):
             conn.execute('DELETE FROM events WHERE id = ?', (theEventId,))
 
 def reset_database():
-    """Reset the events table"""
     with get_connection() as conn:
         if conn is None:
             return False
@@ -63,7 +61,6 @@ def fetch_all_events():
         return cursor.fetchall()
 
 def fetch_event_by_type(event_type='All'):
-    """Fetch events filtered by event type"""
     with get_connection() as conn:
         if conn is None:
             return []
@@ -84,7 +81,6 @@ def fetch_event_by_type(event_type='All'):
         return cursor.fetchall()
 
 def fetch_event_by_extension(extension='All'):
-    """Fetch events filtered by file extension"""
     with get_connection() as conn:
         if conn is None:
             return []
@@ -105,7 +101,6 @@ def fetch_event_by_extension(extension='All'):
         return cursor.fetchall()
 
 def fetch_event_by_after_date(date_range='All'):
-    """Fetch events filtered by date range"""
     with get_connection() as conn:
         if conn is None:
             return []
@@ -123,7 +118,6 @@ def fetch_event_by_after_date(date_range='All'):
         return cursor.fetchall()
 
 def export_to_csv(theFilename: str, events=None):
-    """Export events to CSV file"""
     if events is None:
         events = fetch_all_events()
         
@@ -154,7 +148,6 @@ def get_event_by_id(theEventId: int):
         return cursor.fetchone()
 
 def query_events(filters=None):
-    """Query events from database with combined filters"""
     with get_connection() as conn:
         if conn is None:
             return []
@@ -164,15 +157,15 @@ def query_events(filters=None):
             params = []
             
             if filters:
-                if filters['event_type'] != 'All':
-                    query += " AND event = ?"
-                    params.append(filters['event_type'])
+                if filters.get('event_type') and filters['event_type'] != 'All':
+                    query += " AND event LIKE ?"
+                    params.append(f"%{filters['event_type']}%")
                 
-                if filters['extension'] != 'All':
+                if filters.get('extension') and filters['extension'] != 'All':
                     query += " AND file_extension = ?"
                     params.append(filters['extension'])
                 
-                if filters['date_range'] != 'All':
+                if filters.get('date_range') and filters['date_range'] != 'All':
                     if filters['date_range'] == 'Today':
                         query += " AND DATE(event_timestamp) = DATE('now')"
                     elif filters['date_range'] == 'Last 7 days':
@@ -181,17 +174,19 @@ def query_events(filters=None):
                         query += " AND event_timestamp >= datetime('now', '-30 days')"
             
             query += " ORDER BY event_timestamp DESC"
-            print(f"Executing query: {query} with params: {params}")
+            print(f"DEBUG - Query: {query}")
+            print(f"DEBUG - Params: {params}")
             
             cursor.execute(query, params)
-            return cursor.fetchall()
+            results = cursor.fetchall()
+            print(f"DEBUG - Found {len(results)} results")
+            return results
             
         except Exception as e:
             print(f"Database error: {e}")
             return []
 
 def get_unique_extensions():
-    """Get list of unique file extensions from database"""
     with get_connection() as conn:
         if conn is None:
             return []
@@ -199,3 +194,66 @@ def get_unique_extensions():
         cursor.execute('SELECT DISTINCT file_extension FROM events WHERE file_extension != ""')
         extensions = cursor.fetchall()
         return ['All'] + [ext[0] for ext in extensions if ext[0]]
+
+def save_multiple_events(events):
+    if not events:
+        return False
+        
+    try:
+        with get_connection() as conn:
+            if conn is None:
+                return False
+            
+            cursor = conn.cursor()
+            for event in events:
+                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                file_path = event['filepath']
+                filename = os.path.basename(file_path)
+                extension = os.path.splitext(filename)[1]
+                file_size = os.path.getsize(file_path) if os.path.isfile(file_path) else None
+                user = getpass.getuser()
+
+                cursor.execute("""
+                    INSERT INTO events (
+                        filename, file_path, file_extension, event,
+                        event_timestamp, file_size, user
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    filename, file_path, extension, event['event_type'],
+                    timestamp, file_size, user
+                ))
+            
+            conn.commit()
+            return True
+    except Exception as e:
+        print(f"Error saving events to database: {e}")
+        return False
+
+def format_event_for_display(event):
+    file_path = event[2]
+    filename = os.path.basename(file_path)
+    extension = os.path.splitext(filename)[1] or "(none)"
+    display_path = os.path.relpath(file_path)
+    
+    return (
+        filename,
+        extension,
+        display_path,
+        event[4],
+        event[5]
+    )
+
+def export_events_to_csv(file_path, events):
+    try:
+        with open(file_path, 'w', newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            writer.writerow(['Filename', 'Extension', 'Path', 'Event', 'Timestamp'])
+            
+            for event in events:
+                formatted_event = format_event_for_display(event)
+                writer.writerow(formatted_event)
+        return True
+    except Exception as e:
+        print(f"Error exporting to CSV: {e}")
+        return False

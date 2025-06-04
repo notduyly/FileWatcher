@@ -76,9 +76,13 @@ class MenuBar:
 
     def exit_app(self):
         import sys
+<<<<<<< HEAD
         sys.exit()
 
 
     
 
 
+=======
+        sys.exit()
+>>>>>>> dev
