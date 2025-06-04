@@ -13,7 +13,6 @@ class SetupWindow:
         self.__myRoot.title('File System Watcher')
         self.__myRoot.geometry('800x500')
 
-
         # Directory frame
         directory_frame = tk.Frame(self.__myRoot)
         directory_frame.pack(padx=5, pady=5, fill=tk.X)

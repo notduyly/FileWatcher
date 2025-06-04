@@ -7,7 +7,7 @@ class QueryWindow(tk.Toplevel):
         super().__init__(master)
         self.__myController = theController
         self.title("Database Query")
-        self.geometry("1000x600")
+        self.geometry("800x500")
         
         # Query filters frame
         filter_frame = ttk.LabelFrame(self, text="Query Filters")
