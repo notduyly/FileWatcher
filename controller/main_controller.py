@@ -1,5 +1,3 @@
-import sys
-import os
 import tkinter as tk
 
 from model.fileWatcher import FileWatcher
@@ -22,7 +20,14 @@ class WatcherController:
     def set_view(self, theView):
         self.__myView = theView
 
+    def get_view(self):
+        return self.__myView
+
     def start_watching(self):
+        if not self.__myWatchDirectory:
+            print("No directory selected to watch.")
+            return
+        
         handler = MyEventHandler(logToTextbox=self.__myView.add_log)
 
         if self.__myFileExtension and self.__myFileExtension != 'None':
@@ -50,6 +55,7 @@ class WatcherController:
         print(self.__myWatchDirectory)
         
     def open_query_window(self):
+        """Open database query window"""
         try:
             if hasattr(self, '__query_window') and self.__query_window is not None:
                 self.__query_window.focus()
