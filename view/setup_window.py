@@ -34,6 +34,7 @@ class SetupWindow:
             width=60,
             relief=tk.GROOVE,
             borderwidth=2,
+            bg='white',
             fg='black'
         )
         self.__directory_label.pack(side=tk.LEFT, padx=5, fill=tk.X, expand=True)
