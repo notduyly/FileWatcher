@@ -39,7 +39,10 @@ class MenuBar:
         db_menu.add_command(label="Query database",
                             command=self.__controller.open_query_window,
                             accelerator="Ctrl+f")
-        db_menu.add_command(label="Save to database")
+        db_menu.add_command(label="Save to database",
+                            command=lambda event: self.__controller.get_view().save_to_database(),
+                            accelerator="Ctrl+d"
+                            )
         self.__myMenubar.add_cascade(label="Database", menu=db_menu)
 
         # About menu
@@ -53,6 +56,7 @@ class MenuBar:
         self.__myRoot.bind_all('<Control-s>', lambda event: self.__controller.stop_watching())
         self.__myRoot.bind_all('<Control-o>', lambda event: self.__controller.open_directory())
         self.__myRoot.bind_all('<Control-f>', lambda event: self.__controller.open_query_window())
+        self.__myRoot.bind_all('<Control-d>', lambda event: self.__controller.get_view().save_to_database())
         self.__myRoot.bind_all('<Control-q>', lambda event:self.exit_app())
 
 
@@ -76,13 +80,9 @@ class MenuBar:
 
     def exit_app(self):
         import sys
-<<<<<<< HEAD
         sys.exit()
 
 
     
 
 
-=======
-        sys.exit()
->>>>>>> dev

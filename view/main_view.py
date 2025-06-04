@@ -19,3 +19,6 @@ class FileWatcherGUI:
     
     def get_root(self):
         return self.__myRoot
+    
+    def save_to_database(self):
+        self.__myWindow._save_to_database()

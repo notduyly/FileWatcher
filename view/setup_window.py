@@ -82,7 +82,7 @@ class SetupWindow:
             self.__myRoot,
             text='Save Database',
             font=('Arial', 20),
-            command=self.__save_to_database
+            command=self._save_to_database
         )
         save_button.pack(padx=10, pady=10)
 
@@ -141,7 +141,7 @@ class SetupWindow:
         else:
             self.__directory_label.config(text="No directory selected")
     
-    def __save_to_database(self):
+    def _save_to_database(self):
         if not self.__tree.get_children():
             messagebox.showwarning("Warning", "No events to save.")
             return
