@@ -7,7 +7,7 @@ class MenuBar:
     
     def __init__(self, theRoot, theController):
         self.__myRoot = theRoot
-        self.__controller = theController
+        self.__myController = theController
         self.__myMenubar = Menu(self.__myRoot)
         self._create()
 
@@ -16,31 +16,31 @@ class MenuBar:
         # File menu
         file_menu = Menu(self.__myMenubar, tearoff=0)
         file_menu.add_command(label="Open", 
-                              command=self.__controller.open_directory,
-                              accelerator="Ctrl+o")
+                            command=self.__myController.open_directory,
+                            accelerator="Ctrl+o")
         file_menu.add_separator()
         file_menu.add_command(label="Exit", 
-                              command=self.exit_app,
-                              accelerator="Ctrl+q")
+                            command=self.exit_app,
+                            accelerator="Ctrl+q")
         self.__myMenubar.add_cascade(label="File", menu=file_menu)
 
         # File System Watcher menu
         fsw_menu = Menu(self.__myMenubar, tearoff=0)
         fsw_menu.add_command(label="Start watching", 
-                             command=self.__controller.start_watching,
-                             accelerator="Ctrl+r")
+                            command=self.__myController.start_watching,
+                            accelerator="Ctrl+r")
         fsw_menu.add_command(label="Stop watching",
-                             command=self.__controller.stop_watching,
-                             accelerator="Ctrl+s")
+                            command=self.__myController.stop_watching,
+                            accelerator="Ctrl+s")
         self.__myMenubar.add_cascade(label="File System Watcher", menu=fsw_menu)
 
         # Database menu
         db_menu = Menu(self.__myMenubar, tearoff=0)
         db_menu.add_command(label="Query database",
-                            command=self.__controller.open_query_window,
+                            command=self.__myController.open_query_window,
                             accelerator="Ctrl+f")
         db_menu.add_command(label="Save to database",
-                            command=lambda event: self.__controller.get_view().save_to_database(),
+                            command=lambda event: self.__myController.get_view().save_to_database(),
                             accelerator="Ctrl+d"
                             )
         self.__myMenubar.add_cascade(label="Database", menu=db_menu)
@@ -52,11 +52,11 @@ class MenuBar:
         ab_menu.add_command(label="How to use", command=self.show_how_to_use)
         self.__myMenubar.add_cascade(label="About", menu=ab_menu)
 
-        self.__myRoot.bind_all('<Control-r>', lambda event: self.__controller.start_watching())
-        self.__myRoot.bind_all('<Control-s>', lambda event: self.__controller.stop_watching())
-        self.__myRoot.bind_all('<Control-o>', lambda event: self.__controller.open_directory())
-        self.__myRoot.bind_all('<Control-f>', lambda event: self.__controller.open_query_window())
-        self.__myRoot.bind_all('<Control-d>', lambda event: self.__controller.get_view().save_to_database())
+        self.__myRoot.bind_all('<Control-r>', lambda event: self.__myController.start_watching())
+        self.__myRoot.bind_all('<Control-s>', lambda event: self.__myController.stop_watching())
+        self.__myRoot.bind_all('<Control-o>', lambda event: self.__myController.open_directory())
+        self.__myRoot.bind_all('<Control-f>', lambda event: self.__myController.open_query_window())
+        self.__myRoot.bind_all('<Control-d>', lambda event: self.__myController.get_view().save_to_database())
         self.__myRoot.bind_all('<Control-q>', lambda event:self.exit_app())
 
 
@@ -81,8 +81,4 @@ class MenuBar:
     def exit_app(self):
         import sys
         sys.exit()
-
-
-    
-
 

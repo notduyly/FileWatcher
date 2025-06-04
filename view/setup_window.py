@@ -1,4 +1,3 @@
-import queue
 import tkinter as tk
 from tkinter import ttk
 import os
@@ -13,6 +12,7 @@ class SetupWindow:
         # Init Window
         self.__myRoot.title('File System Watcher')
         self.__myRoot.geometry('800x800')
+        # self.__myRoot.configure(bg='white')
 
 
         # Directory frame
@@ -34,7 +34,7 @@ class SetupWindow:
             width=60,
             relief=tk.GROOVE,
             borderwidth=2,
-            background='white',
+            fg='black'
         )
         self.__directory_label.pack(side=tk.LEFT, padx=5, fill=tk.X, expand=True)
         
@@ -72,16 +72,16 @@ class SetupWindow:
         query_button = tk.Button(
             self.__myRoot,
             text='Query Database',
-            font=('Arial', 20),
+            font=('Arial', 16),
             command=self.__myController.open_query_window
         )
-        query_button.pack(padx=10, pady=10)  # Changed padding
+        query_button.pack(padx=10, pady=10)
 
         # Save Database Button
         save_button = tk.Button(
             self.__myRoot,
             text='Save Database',
-            font=('Arial', 20),
+            font=('Arial', 16),
             command=self._save_to_database
         )
         save_button.pack(padx=10, pady=10)
