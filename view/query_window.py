@@ -1,9 +1,32 @@
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
-import os
 
 class QueryWindow(tk.Toplevel):
+    """
+    Database query window.
+    
+    Attributes:
+        __myController: The main controller.
+        __myEventTypeVar: The event type filter selection.
+        __myEventTypeCombo: Combobox for selecting event type filter.
+        __myExtVar: The file extension filter selection.
+        __myExtCombo: Combobox for selecting file extension filter.
+        __myDateVar: The date range filter selection.
+        __myDateCombo: Combobox for selecting date range filter.
+        __myTree: The display of query results.
+        __email_entry: The email address input.
+        __last_exported_file: Path to the last exported CSV file.
+        __db_results: List containing the current query results.
+    """
+    
     def __init__(self, master, theController):
+        """
+        Initialize the QueryWindow with master window and controller.
+        
+        Args:
+            master: The parent window for this dialog.
+            theController: The main controller.
+        """
         super().__init__(master)
         self.__myController = theController
         self.title("Database Query")
@@ -93,6 +116,9 @@ class QueryWindow(tk.Toplevel):
         self.__perform_query()
     
     def __perform_query(self):
+        """
+        Execute a database query based on current filter settings and update the display.
+        """
         for item in self.__myTree.get_children():
             self.__myTree.delete(item)
         
@@ -125,6 +151,9 @@ class QueryWindow(tk.Toplevel):
         self.__db_results = results
 
     def export_to_csv(self):
+        """
+        Exports current query results to a CSV file.
+        """
         file_path = filedialog.asksaveasfilename(
             defaultextension=".csv",
             filetypes=[("CSV files", "*.csv")]
@@ -138,6 +167,9 @@ class QueryWindow(tk.Toplevel):
             messagebox.showerror("Error", "Failed to export CSV")
 
     def send_email(self):
+        """
+        Send query results via email as a CSV attachment.
+        """
         recipient = self.__email_entry.get()
         
         if not self.__myController.validate_email(recipient):
@@ -158,6 +190,9 @@ class QueryWindow(tk.Toplevel):
             messagebox.showerror("Error", "Failed to send email.")
     
     def reset_database(self):
+        """
+        Reset the database after user confirmation.
+        """
         if messagebox.askyesno("Confirm Reset", 
                             "Are you sure you want to reset the database?\n"
                             "This action cannot be undone!"):

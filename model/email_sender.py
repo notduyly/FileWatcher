@@ -9,6 +9,12 @@ from googleapiclient.discovery import build
 SCOPES = ['https://www.googleapis.com/auth/gmail.send']
 
 def __gmail_authenticate():
+    """
+    Authenticate with Gmail API using OAuth2 credentials.
+    
+    Returns:
+        googleapiclient.discovery.Resource: Gmail service object for API calls.
+    """
     creds = None
     
     if os.path.exists('token.json'):
@@ -27,6 +33,22 @@ def __gmail_authenticate():
     return build('gmail', 'v1', credentials=creds)
 
 def __compose_email_message(service, to, subject, body_text, attachment_path=None):
+    """
+    Compose and send an email message with optional attachment via Gmail API.
+    
+    Args:
+        service: Authenticated Gmail service object.
+        to: Recipient email address.
+        subject: Email subject line.
+        body_text: Email body content.
+        attachment_path: Path to file to attach. Defaults to None.
+        
+    Returns:
+        dict: Gmail API response containing message details and message ID.
+        
+    Raises:
+        Exception: If file attachment cannot be read or email sending fails.
+    """
     message = EmailMessage()
     message.set_content(body_text)
     message['To'] = to
@@ -50,6 +72,19 @@ def __compose_email_message(service, to, subject, body_text, attachment_path=Non
     return send_message
 
 def send_email_with_attachment(recipient: str, file_path: str) -> bool:
+    """
+    Send an email with a CSV attachment containing file watch events.
+    
+    Args:
+        recipient: Email address of the recipient.
+        file_path: Path to the CSV file to attach to the email.
+        
+    Returns:
+        bool: True if email was sent successfully, False if any error occurred.
+        
+    Raises:
+        Exception: Catches and handles all exceptions, returning False on failure.
+    """
     try:
         service = __gmail_authenticate()
         if not service:
@@ -77,6 +112,15 @@ def send_email_with_attachment(recipient: str, file_path: str) -> bool:
         return False
 
 def validate_email(email: str) -> bool:
+    """
+    Validate an email address format using regular expression pattern matching.
+    
+    Args:
+        email: Email address string to validate.
+        
+    Returns:
+        bool: True if email format is valid, False otherwise.
+    """
     import re
     pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
     return bool(re.match(pattern, email))

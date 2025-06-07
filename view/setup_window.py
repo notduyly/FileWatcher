@@ -5,7 +5,27 @@ import datetime
 from tkinter import messagebox
 
 class SetupWindow:
+    """
+    Main setup window for the File Watcher application.
+    
+    Attributes:
+        __myRoot: The root Tkinter window instance.
+        __myController: The main controller.
+        __directory_label: Label displaying the currently selected directory.
+        __fileExtensionSelection: The selected file extension filter.
+        __fileExtensionOptions: List of available file extension filter options.
+        __fileExtensionDropdown: OptionMenu for selecting file extension filters.
+        __tree: TreeView widget for displaying file system events in real-time.
+    """
+    
     def __init__(self, theRoot, theController):
+        """
+        Initialize the SetupWindow with root window and controller.
+        
+        Args:
+            theRoot: The root Tkinter window instance.
+            theController: The main controller.
+        """
         self.__myRoot = theRoot
         self.__myController = theController
 
@@ -99,8 +119,13 @@ class SetupWindow:
         
         self.__tree.pack(fill=tk.BOTH, expand=True, pady=30)
 
-
     def add_log(self, theMessage: str):
+        """
+        Adds a file system event log entry to the tree view display.
+        
+        Args:
+            theMessage: Event message.
+        """
         arr = theMessage.split(': ')
 
         event_type = arr[0]
@@ -119,6 +144,12 @@ class SetupWindow:
             self.__tree.delete(oldest)
     
     def _handle_fileExtension_change(self, *args):
+        """
+        Handles changes to the file extension filter selection.
+        
+        Args:
+            *args: Variable arguments passed by the StringVar trace callback.
+        """
         curr_selection = self.__fileExtensionSelection.get()
 
         self.__myController.set_file_extension(curr_selection)
@@ -130,17 +161,25 @@ class SetupWindow:
         for option in options:
             menu.add_command(
                 label=option,
-                command=lambda 
-                value=option: self.__fileExtensionSelection.set(value)
+                command=lambda value=option: self.__fileExtensionSelection.set(value)
             )
     
     def update_directory_display(self, theDirectory):
+        """
+        Updates the directory display label with the selected directory path.
+        
+        Args:
+            theDirectory: The directory path to display.
+        """
         if theDirectory:
             self.__directory_label.config(text=f"Selected directory: {theDirectory}")
         else:
             self.__directory_label.config(text="No directory selected")
     
     def _save_to_database(self):
+        """
+        Saves currently displayed events to the database.
+        """
         if not self.__tree.get_children():
             messagebox.showwarning("Warning", "No events to save.")
             return

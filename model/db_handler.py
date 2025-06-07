@@ -1,4 +1,3 @@
-import sqlite3
 import csv
 import os
 from datetime import datetime
@@ -7,6 +6,13 @@ from .database import get_connection
 
 
 def insert_event(theEvent, thePath):
+    """
+    Inserts a single event into the database.
+    
+    Args:
+        theEvent: The type of event ('created', 'modified', 'deleted').
+        thePath: The file path where the event occurred.
+    """
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     abs_path = os.path.abspath(thePath)
     file_name = os.path.basename(abs_path)
@@ -30,6 +36,12 @@ def insert_event(theEvent, thePath):
             ))
 
 def delete_event(theEventId: int):
+    """
+    Deletes a specific event from the database by its ID.
+    
+    Args:
+        theEventId: The unique ID of the event to delete.
+    """
     with get_connection() as conn:
         if conn is None:
             return
@@ -37,6 +49,15 @@ def delete_event(theEventId: int):
             conn.execute('DELETE FROM events WHERE id = ?', (theEventId,))
 
 def reset_database():
+    """
+    Resets the database.
+    
+    Returns:
+        bool: True if reset was successful, False if an error occurred.
+        
+    Note:
+        This operation is irreversible and will delete all stored events.
+    """
     with get_connection() as conn:
         if conn is None:
             return False
@@ -51,6 +72,12 @@ def reset_database():
             return False
 
 def fetch_all_events():
+    """
+    Retrieves all events from the database.
+    
+    Returns:
+        list: List of all event records, or empty list if error.
+    """
     with get_connection() as conn:
         if conn is None:
             return []
@@ -59,6 +86,15 @@ def fetch_all_events():
         return cursor.fetchall()
 
 def fetch_event_by_type(theEventType='All'):
+    """
+    Retrieves events filtered by event type.
+    
+    Args:
+        theEventType: The event type to filter by. Defaults to 'All' to retrieve all events.
+    
+    Returns:
+        list: List of events matching the specified type.
+    """
     with get_connection() as conn:
         if conn is None:
             return []
@@ -79,6 +115,15 @@ def fetch_event_by_type(theEventType='All'):
         return cursor.fetchall()
 
 def fetch_event_by_extension(theExtension='All'):
+    """
+    Retrieves events filtered by file extension.
+    
+    Args:
+        theExtension: The file extension to filter by. Defaults to 'All' to retrieve all events.
+    
+    Returns:
+        list: List of events with matching file extension.
+    """
     with get_connection() as conn:
         if conn is None:
             return []
@@ -99,6 +144,17 @@ def fetch_event_by_extension(theExtension='All'):
         return cursor.fetchall()
 
 def fetch_event_by_after_date(theDateRange='All'):
+    """
+    Retrieves events filtered by date range.
+    
+    Args:
+        theDateRange: The date range filter. Options include:
+            'All', 'Today', 'Last 7 days', 'Last 30 days'.
+            Defaults to 'All'.
+    
+    Returns:
+        list: List of events within the specified date range.
+    """
     with get_connection() as conn:
         if conn is None:
             return []
@@ -116,6 +172,12 @@ def fetch_event_by_after_date(theDateRange='All'):
         return cursor.fetchall()
 
 def get_event_count():
+    """
+    Gets the total number of events in the database.
+    
+    Returns:
+        int: Total count of events, or 0 if database connection fails.
+    """
     with get_connection() as conn:
         if conn is None:
             return 0
@@ -124,6 +186,15 @@ def get_event_count():
         return cursor.fetchone()[0]
 
 def get_event_by_id(theEventId: int):
+    """
+    Retrieves a specific event by its unique ID.
+    
+    Args:
+        theEventId: The unique ID of the event.
+    
+    Returns:
+        tuple or None: Event data if found, None if not found or on error.
+    """
     with get_connection() as conn:
         if conn is None:
             return None
@@ -132,6 +203,19 @@ def get_event_by_id(theEventId: int):
         return cursor.fetchone()
 
 def query_events(theFilters=None):
+    """
+    Query events with multiple filter criteria.
+    
+    Args:
+        theFilters: Dictionary containing filter criteria:
+            - 'event_type': Filter by event type
+            - 'extension': Filter by file extension  
+            - 'date_range': Filter by date range
+            Defaults to None (no filters applied).
+    
+    Returns:
+        list: List of events matching all specified filters,
+    """
     with get_connection() as conn:
         if conn is None:
             return []
@@ -171,6 +255,12 @@ def query_events(theFilters=None):
             return []
 
 def get_unique_extensions():
+    """
+    Gets all unique file extensions from the events table.
+    
+    Returns:
+        list: List of unique file extensions found in the database,
+    """
     with get_connection() as conn:
         if conn is None:
             return []
@@ -180,6 +270,17 @@ def get_unique_extensions():
         return ['All'] + [ext[0] for ext in extensions if ext[0]]
 
 def save_multiple_events(theEvents):
+    """
+    Save multiple events to the database in a single transaction.
+    
+    Args:
+        theEvents: List of event dictionaries, each containing:
+            - 'filepath': Path to the file
+            - 'event_type': Type of file system event
+    
+    Returns:
+        bool: True if all events were saved successfully, False otherwise.
+    """
     if not theEvents:
         return False
         
@@ -215,6 +316,20 @@ def save_multiple_events(theEvents):
         return False
 
 def format_event_for_display(theEvent):
+    """
+    Format a database event record for display.
+    
+    Args:
+        theEvent: Raw event data from database query.
+        
+    Returns:
+        tuple: Formatted event data containing:
+            - filename: Base filename without path
+            - extension: File extension or "(none)" if empty
+            - display_path: Relative path for display
+            - event_type: Type of file system event
+            - timestamp: When the event occurred
+    """
     file_path = theEvent[2]
     filename = os.path.basename(file_path)
     extension = os.path.splitext(filename)[1] or "(none)"
@@ -229,6 +344,16 @@ def format_event_for_display(theEvent):
     )
 
 def export_events_to_csv(thePath, theEvents):
+    """
+    Exports event data to a CSV file.
+    
+    Args:
+        thePath: Full path where the CSV file should be saved.
+        theEvents: List of events to export.
+    
+    Returns:
+        bool: True if export was successful, False if an error occurred.
+    """
     try:
         with open(thePath, 'w', newline='', encoding='utf-8') as f:
             writer = csv.writer(f)
