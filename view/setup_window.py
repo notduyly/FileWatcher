@@ -11,6 +11,7 @@ class SetupWindow:
     Attributes:
         __myRoot: The root Tkinter window instance.
         __myController: The main controller.
+        __events_saved: Track if events have been saved
         __directory_label: Label displaying the currently selected directory.
         __fileExtensionSelection: The selected file extension filter.
         __fileExtensionOptions: List of available file extension filter options.
@@ -28,6 +29,7 @@ class SetupWindow:
         """
         self.__myRoot = theRoot
         self.__myController = theController
+        self.__events_saved = True
 
         # Init Window
         self.__myRoot.title('File System Watcher')
@@ -119,6 +121,9 @@ class SetupWindow:
         
         self.__tree.pack(fill=tk.BOTH, expand=True, pady=30)
 
+        # Bind the window close event
+        self.__myRoot.protocol("WM_DELETE_WINDOW", self._on_closing)
+
     def add_log(self, theMessage: str):
         """
         Adds a file system event log entry to the tree view display.
@@ -137,6 +142,9 @@ class SetupWindow:
         timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         
         self.__tree.insert('', 0, values=(filename, extension, file_path, event_type, timestamp))
+        
+        # Mark events as unsaved when new events are added
+        self.__events_saved = False
         
         # If there are more than 100 items, remove the oldest ones
         if len(self.__tree.get_children()) > 100:
@@ -197,8 +205,31 @@ class SetupWindow:
             
             if self.__myController.save_events_to_database(events):
                 messagebox.showinfo("Success", "Events saved to database.")
+                # Mark events as saved
+                self.__events_saved = True
                 # Clear the logs after save
                 for item in self.__tree.get_children():
                     self.__tree.delete(item)
             else:
                 messagebox.showerror("Error", "Failed to save events to database")
+    
+    def _on_closing(self):
+        """
+        Handle the window closing event.
+        
+        Prompts user to save unsaved events before closing the application.
+        """
+        if self.__tree.get_children() and not self.__events_saved:
+            result = messagebox.askyesnocancel(
+                "Unsaved Events", 
+                "You have unsaved events. Do you want to save them before closing?"
+            )
+            
+            if result is True:
+                self._save_to_database()
+                if self.__events_saved:
+                    self.__myRoot.destroy()
+            elif result is False:
+                self.__myRoot.destroy()
+        else:
+            self.__myRoot.destroy()
