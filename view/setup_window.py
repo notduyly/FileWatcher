@@ -81,7 +81,7 @@ class SetupWindow:
         stop_button.pack(side=tk.LEFT)
         # Dropwdown menu to choose which file extension
         self.__fileExtensionSelection = tk.StringVar(value='None')
-        self.__fileExtensionOptions = ['None', '.png', '.txt']
+        self.__fileExtensionOptions = ['None', '.txt', '.pdf', '.csv', '.docx', '.xlsx', '.png']
         self.__fileExtensionDropdown = tk.OptionMenu(control_frame, 
                                             self.__fileExtensionSelection, 
                                             *[opt for opt in self.__fileExtensionOptions if opt != self.__fileExtensionSelection.get()])
