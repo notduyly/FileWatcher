@@ -70,7 +70,7 @@ class MenuBar:
                             command=self.__myController.open_query_window,
                             accelerator="Ctrl+f")
         db_menu.add_command(label="Save to database",
-                            command=lambda event: self.__myController.get_view().save_to_database(),
+                            command=lambda: self.__myController.get_view().save_to_database(),
                             accelerator="Ctrl+d"
                             )
         self.__myMenubar.add_cascade(label="Database", menu=db_menu)
