@@ -60,3 +60,12 @@ class FileWatcherGUI:
         Triggers the save to database operation.
         """
         self.__myWindow._save_to_database()
+
+    def get_window(self):
+        """
+        Gets the setup window instance.
+        
+        Returns:
+            The SetupWindow instance.
+        """
+        return self.__myWindow

@@ -57,12 +57,20 @@ class WatcherController:
 
         self.__myWatcher = FileWatcher(self.__myWatchDirectory, handler)
         self.__myWatcher.start()
+        
+        # Disable the start button when watching begins
+        self.__myView.get_window().set_start_button_state(False)
+        
         print(f"Started watching directory: {self.__myWatchDirectory}")
     
     def stop_watching(self):
         """Stop the current file watching operation if one is active."""
         if self.__myWatcher:
             self.__myWatcher.stop()
+            
+            # Re-enable the start button when watching stops
+            self.__myView.get_window().set_start_button_state(True)
+            
             print("Stopped watching")
 
     def open_directory(self):
