@@ -17,6 +17,7 @@ class SetupWindow:
         __fileExtensionOptions: List of available file extension filter options.
         __fileExtensionDropdown: OptionMenu for selecting file extension filters.
         __tree: TreeView widget for displaying file system events in real-time.
+        __start_button: Reference to the start button for state control.
     """
     
     def __init__(self, theRoot, theController):
@@ -64,13 +65,13 @@ class SetupWindow:
         control_frame = tk.Frame(self.__myRoot) 
         control_frame.pack(padx=5, pady=5, anchor=tk.W)
         # Start button
-        start_button = tk.Button(
+        self.__start_button = tk.Button(
             control_frame,
             text='Start',
             font=('Arial', 16),
             command=theController.start_watching
         )
-        start_button.pack(side=tk.LEFT, padx=5)
+        self.__start_button.pack(side=tk.LEFT, padx=5)
         # Stop button
         stop_button = tk.Button(
             control_frame,
@@ -233,3 +234,15 @@ class SetupWindow:
                 self.__myRoot.destroy()
         else:
             self.__myRoot.destroy()
+
+    def set_start_button_state(self, enabled):
+        """
+        Enable or disable the start button.
+        
+        Args:
+            enabled: True to enable the button, False to disable it.
+        """
+        if enabled:
+            self.__start_button.config(state='normal')
+        else:
+            self.__start_button.config(state='disabled')
